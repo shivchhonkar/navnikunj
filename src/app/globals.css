@@ -1,0 +1,19 @@
+@import '../styles/theme.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: rgb(var(--cream));
+  color: rgb(var(--ink));
+  font-family: var(--font-text);
+}
+
+* {
+  scrollbar-width: thin;
+}
