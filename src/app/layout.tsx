@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
-import { Source_Sans_3 } from 'next/font/google';
+import { inter } from '@/fonts/inter';
 import { getSite, siteUrl } from '@/lib/store';
 import './globals.css';
-
-const sans = Source_Sans_3({ subsets: ['latin'], variable: '--font-sans' });
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
   return (
     <html lang="en">
-      <body className={`${sans.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} font-sans antialiased`}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         {children}
       </body>

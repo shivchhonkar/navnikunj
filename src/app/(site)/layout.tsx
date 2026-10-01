@@ -1,9 +1,7 @@
-import { Inter } from 'next/font/google';
+import { inter } from '@/fonts/inter';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { getSite } from '@/lib/store';
-
-const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-sans' });
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   const site = getSite();
