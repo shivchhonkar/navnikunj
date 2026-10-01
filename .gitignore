@@ -1,5 +1,6 @@
 node_modules
 .next
+logs
 .env.local
 data/site.json
 public/uploads/*

@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev -p 7200",
     "build": "next build",
-    "start": "next start -p 7200"
+    "start": "next start -p 7200",
+    "pm2:start": "pm2 start ecosystem.config.cjs",
+    "pm2:reload": "pm2 reload navnikunj",
+    "pm2:stop": "pm2 stop navnikunj"
   },
   "dependencies": {
     "lucide-react": "^0.454.0",
