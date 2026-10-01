@@ -22,7 +22,7 @@ export function createSeed(): SiteData {
       eyebrow: 'Serving society through',
       title: 'Kindness that opens a better tomorrow',
       text: 'We stand with families who need a school place, a health visit, a meal, or a skill they can use. Every gift is tracked, and every program is built to last beyond a single day.',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=2000&q=80',
     },
     stats: [
       { value: '1,200+', label: 'People supported' },

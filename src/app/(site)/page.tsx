@@ -3,7 +3,7 @@ import { ArrowRight, BadgeCheck, BookOpen, Heart, Users } from 'lucide-react';
 import { ProgramSlider } from '@/components/ProgramSlider';
 import { getSite } from '@/lib/store';
 
-const HERO_PHOTO = 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=2000&q=80';
+const HERO_PHOTO = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=2000&q=80';
 const ABOUT_PHOTO = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1400&q=80';
 
 const STORY_PHOTOS = [
