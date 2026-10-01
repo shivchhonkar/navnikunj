@@ -51,7 +51,7 @@ export default function HomePage() {
       </section>
 
       <section className="relative overflow-hidden border-b border-line bg-[#FCF2E4]" aria-label="Impact">
-        <img src="/images/bg_images/stats_bg.png" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-fill" />
+        <img src="/images/bg_images/stats_bg.png" alt="" className="pointer-events-none absolute left-1/2 top-0 h-full w-[112%] max-w-none -translate-x-1/2 object-fill" />
         <dl className="relative mx-auto grid w-full max-w-[76rem] grid-cols-2 px-[18%] md:grid-cols-4 md:px-[11%]">
           {site.stats.map((item, index) => {
             const Icon = STAT_ICONS[index % STAT_ICONS.length];
