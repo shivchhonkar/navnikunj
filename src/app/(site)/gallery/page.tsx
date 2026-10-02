@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { GalleryView } from '@/components/GalleryView';
 import { getSite } from '@/lib/store';
 
-const BANNER_PHOTO = 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=2000&q=80';
+const BANNER_PHOTO = '/images/banner_images/banner-poor-childrens.jpeg';
 
 export const metadata: Metadata = {
   title: 'Gallery',

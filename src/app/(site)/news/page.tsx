@@ -4,7 +4,7 @@ import { PostCard } from '@/components/PostCard';
 import { getSite } from '@/lib/store';
 import type { PostKind } from '@/lib/types';
 
-const BANNER_PHOTO = 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=2000&q=80';
+const BANNER_PHOTO = '/images/banner_images/banner-poor-childrens.jpeg';
 
 export const metadata: Metadata = {
   title: 'News and updates',
