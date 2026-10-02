@@ -13,6 +13,24 @@ function ensureFile() {
   writeFileSync(filePath, JSON.stringify(createSeed(), null, 2));
 }
 
+/** site.json is not in git, so a server that already has the file keeps the previous contact details. */
+function applyContactUpdate(site: SiteData) {
+  const identity = site.identity;
+  const oldEmail = identity.email.trim().toLowerCase() === 'info@navnikunjfoundation.org';
+  const oldPhone = identity.phone.replace(/\D/g, '').endsWith('9650593996');
+  if (!oldEmail && !oldPhone) return false;
+  if (oldEmail) identity.email = 'info@navnikunjfoundation.com';
+  if (oldPhone) {
+    identity.phone = '+91 9720202640';
+    identity.phoneHref = '+919720202640';
+  }
+  if (!identity.phone2) {
+    identity.phone2 = '+91 9720202650';
+    identity.phoneHref2 = '+919720202650';
+  }
+  return true;
+}
+
 export function getSite() {
   ensureFile();
   const mtime = statSync(filePath).mtimeMs;
@@ -32,6 +50,7 @@ export function getSite() {
   cache.posts ||= [];
   for (const post of cache.posts) post.keywords ||= '';
   cache.programs ||= [];
+  if (applyContactUpdate(cache)) return saveSite(cache);
   return cache;
 }
 
