@@ -112,7 +112,7 @@ export function DonateForm({ configured }: { configured: boolean }) {
       <label className="block text-sm font-medium">PAN number<input name="pan" required maxLength={10} className={`${field} uppercase`} autoComplete="off" placeholder="ABCDE1234F" /></label>
       <label className="block text-sm font-medium">Address<textarea name="address" required rows={2} className={field} autoComplete="street-address" /></label>
       <label className="block text-sm font-medium">Country<input name="country" required defaultValue="India" className={field} autoComplete="country-name" /></label>
-      {!configured && <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">Razorpay keys are not set yet. Add them in .env.local to take live payments.</p>}
+      {/* {!configured && <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">Razorpay keys are not set yet. </p>} */}
       {error && <p className="text-sm text-red-700">{error}</p>}
       {success && <p className="text-sm text-emerald-800">{success}</p>}
       <button disabled={pending} className="w-full rounded-full bg-brand px-5 py-3 text-sm font-semibold text-white hover:bg-brandDark disabled:opacity-60">{pending ? 'Opening Razorpay…' : 'Donate with Razorpay'}</button>

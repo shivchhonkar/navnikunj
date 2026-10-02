@@ -59,7 +59,10 @@ export function SiteFooter({ identity }: { identity: SiteData['identity'] }) {
         </div>
       </div>
       <div className="border-t border-white/10">
-        <p className="shell py-4 text-xs text-white/70">© {new Date().getFullYear()} {identity.name}. All rights reserved.</p>
+        <div className="shell flex flex-col items-center justify-between gap-2 py-4 text-center text-xs text-white/70 sm:flex-row sm:text-left">
+          <p>© {new Date().getFullYear()} {identity.name}. All rights reserved.</p>
+          <p>Powered by <span className="font-medium tracking-wide text-white/90"> <a href="https://www.shribi.com" target="_blank" rel="noreferrer">Shribi Technologies</a></span></p>
+        </div>
       </div>
     </footer>
   );
