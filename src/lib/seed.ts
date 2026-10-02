@@ -8,7 +8,7 @@ export function createSeed(): SiteData {
     identity: {
       name: 'Navnikunj Foundation',
       tagline: 'Kindness · Hope · Better tomorrows',
-      email: 'info@navnikunjfoundation.org',
+      email: 'info@navnikunjfoundation.com',
       phone: '+91 9720202640',
       phoneHref: '+919720202640',
       phone2: '+91 9720202650',
