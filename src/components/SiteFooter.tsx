@@ -41,6 +41,7 @@ export function SiteFooter({ identity }: { identity: SiteData['identity'] }) {
             <li className="flex gap-2"><MapPin size={15} className="mt-0.5 shrink-0" /> <span className="whitespace-pre-line">{identity.address}</span></li>
             <li><a className="inline-flex items-center gap-2 hover:text-white" href={`mailto:${identity.email}`}><Mail size={15} /> {identity.email}</a></li>
             <li><a className="inline-flex items-center gap-2 hover:text-white" href={`tel:${identity.phoneHref}`}><Phone size={15} /> {identity.phone}</a></li>
+            {identity.phone2 ? <li><a className="inline-flex items-center gap-2 hover:text-white" href={`tel:${identity.phoneHref2}`}><Phone size={15} /> {identity.phone2}</a></li> : null}
           </ul>
         </div>
         <div>

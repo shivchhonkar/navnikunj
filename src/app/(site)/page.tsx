@@ -3,13 +3,13 @@ import { ArrowRight, BadgeCheck, BookOpen, Heart, Users } from 'lucide-react';
 import { ProgramSlider } from '@/components/ProgramSlider';
 import { getSite } from '@/lib/store';
 
-const HERO_PHOTO = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=2000&q=80';
-const ABOUT_PHOTO = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1400&q=80';
+const HERO_PHOTO = '/images/banner_images/banner-poor-childrens.jpeg';
+const ABOUT_PHOTO = '/images/banner_images/banner-poor-childrens.jpeg';
 
 const STORY_PHOTOS = [
-  'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=900&q=80',
+  '/images/banner_images/banner-smile-face.jpeg',
+  '/images/banner_images/banner-education.jpeg',
+  '/images/banner_images/banner-poor-childrens.jpeg',
 ];
 
 const STAT_ICONS = [Users, BookOpen, Heart, BadgeCheck];

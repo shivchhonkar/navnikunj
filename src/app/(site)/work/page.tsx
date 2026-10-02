@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { PROGRAM_ICONS } from '@/lib/icons';
 import { getSite } from '@/lib/store';
 
-const BANNER_PHOTO = 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=2000&q=80';
+const BANNER_PHOTO = '/images/banner_images/s-banner-health-check.jpeg';
 
 export const metadata: Metadata = {
   title: 'Our work',

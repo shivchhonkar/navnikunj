@@ -1,10 +1,11 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import path from 'path';
 import { createSeed } from './seed';
 import type { SiteData } from './types';
 
 const filePath = path.join(process.cwd(), 'data', 'site.json');
 let cache: SiteData | null = null;
+let cacheMtime = 0;
 
 function ensureFile() {
   if (existsSync(filePath)) return;
@@ -13,9 +14,13 @@ function ensureFile() {
 }
 
 export function getSite() {
-  if (cache) return cache;
   ensureFile();
+  const mtime = statSync(filePath).mtimeMs;
+  if (cache && cacheMtime === mtime) return cache;
+  cacheMtime = mtime;
   cache = JSON.parse(readFileSync(filePath, 'utf8')) as SiteData;
+  cache.identity.phone2 ||= '';
+  cache.identity.phoneHref2 ||= '';
   cache.messages ||= [];
   cache.donations ||= [];
   for (const donation of cache.donations) {
@@ -34,6 +39,7 @@ export function saveSite(site: SiteData) {
   mkdirSync(path.dirname(filePath), { recursive: true });
   writeFileSync(filePath, JSON.stringify(site, null, 2));
   cache = site;
+  cacheMtime = statSync(filePath).mtimeMs;
   return site;
 }
 

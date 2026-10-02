@@ -11,7 +11,7 @@ export async function PUT(request: Request) {
   const body = await request.json().catch(() => ({}));
   updateSite((site) => {
     if (body.identity && typeof body.identity === 'object') {
-      for (const key of ['name', 'tagline', 'email', 'phone', 'phoneHref', 'address', 'mapQuery', 'facebook', 'instagram', 'youtube', 'linkedin'] as const) {
+      for (const key of ['name', 'tagline', 'email', 'phone', 'phoneHref', 'phone2', 'phoneHref2', 'address', 'mapQuery', 'facebook', 'instagram', 'youtube', 'linkedin'] as const) {
         if (key in body.identity) site.identity[key] = text(body.identity[key]);
       }
     }

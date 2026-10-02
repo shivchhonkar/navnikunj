@@ -23,7 +23,7 @@ import {
 import { getSite } from '@/lib/store';
 import type { LucideIcon } from 'lucide-react';
 
-const BANNER_PHOTO = 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=2000&q=80';
+const BANNER_PHOTO = '/images/banner_images/banner-poor-childrens.jpeg';
 const STORY_PHOTO = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1400&q=80';
 
 const AREAS: { title: string; text: string; icon: LucideIcon }[] = [

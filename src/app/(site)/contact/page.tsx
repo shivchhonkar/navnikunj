@@ -35,6 +35,7 @@ export default function ContactPage() {
             <li className="flex gap-2"><MapPin className="mt-0.5 shrink-0 text-brand" size={16} /> <span className="whitespace-pre-line">{identity.address}</span></li>
             <li><a className="inline-flex items-center gap-2" href={`mailto:${identity.email}`}><Mail className="text-brand" size={16} /> {identity.email}</a></li>
             <li><a className="inline-flex items-center gap-2" href={`tel:${identity.phoneHref}`}><Phone className="text-brand" size={16} /> {identity.phone}</a></li>
+            {identity.phone2 ? <li><a className="inline-flex items-center gap-2" href={`tel:${identity.phoneHref2}`}><Phone className="text-brand" size={16} /> {identity.phone2}</a></li> : null}
           </ul>
           <MapEmbed query={identity.mapQuery || identity.address} />
         </div>

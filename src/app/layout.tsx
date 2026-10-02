@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     slogan: site.identity.tagline,
     url: siteUrl(),
     email: site.identity.email,
-    telephone: site.identity.phone,
+    telephone: [site.identity.phone, site.identity.phone2].filter(Boolean),
     address: site.identity.address,
     logo: `${siteUrl()}/images/logo.svg`,
   };

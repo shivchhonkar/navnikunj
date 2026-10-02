@@ -64,6 +64,8 @@ export type SiteData = {
     email: string;
     phone: string;
     phoneHref: string;
+    phone2: string;
+    phoneHref2: string;
     address: string;
     mapQuery: string;
     facebook: string;
