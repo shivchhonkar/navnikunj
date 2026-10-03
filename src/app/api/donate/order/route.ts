@@ -40,6 +40,7 @@ export async function POST(request: Request) {
       amount: rupees,
       orderId: order.id,
       paymentId: '',
+      method: '',
       status: 'created',
       at: new Date().toISOString(),
     });

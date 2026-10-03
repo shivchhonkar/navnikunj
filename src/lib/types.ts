@@ -51,8 +51,24 @@ export type Donation = {
   amount: number;
   orderId: string;
   paymentId: string;
+  method: string;
   status: 'created' | 'paid' | 'failed';
   at: string;
+};
+
+export type DonationReceipt = {
+  status: 'paid' | 'failed';
+  name: string;
+  email: string;
+  phone: string;
+  pan: string;
+  address: string;
+  country: string;
+  amount: number;
+  at: string;
+  paymentId: string;
+  method: string;
+  message: string;
 };
 
 export type SiteData = {

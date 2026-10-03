@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     amount,
     orderId: '',
     paymentId: '',
+    method: 'Manual',
     status: 'paid' as const,
     at: new Date().toISOString(),
   };

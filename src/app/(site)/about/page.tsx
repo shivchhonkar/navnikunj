@@ -53,7 +53,7 @@ const VALUES: { title: string; text: string; icon: LucideIcon }[] = [
 
 export const metadata: Metadata = {
   title: 'About us',
-  description: 'Navnikunj Foundation works with communities on education, healthcare, livelihoods, and humanitarian support.',
+  description: 'Navnikunj Foundation is a non-profit organization dedicated to empowering underserved communities and creating sustainable social impact.',
   alternates: { canonical: '/about' },
 };
 
@@ -69,19 +69,18 @@ export default function AboutPage() {
         <div className="shell relative flex min-h-[13rem] items-center py-12 md:min-h-[17rem] md:justify-end">
           <div className="max-w-lg md:text-right">
             <h1 className="heading-xl">About Us</h1>
-            <p className="mt-3 text-base text-white/90 sm:text-lg">Together for a Better Tomorrow</p>
+            <p className="mt-3 text-base text-white/90 sm:text-lg">Together, we can make a difference.</p>
           </div>
         </div>
       </section>
 
       <section className="section shell grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
         <div>
-          <h2 className="heading-lg text-brand">Who We Are</h2>
-          <p className="mt-3 text-lg leading-snug text-ink">Working Together for a Better Tomorrow</p>
-          <p className="lead mt-5">Navnikunj Foundation is committed to creating positive and lasting change in communities by working with people who need support, opportunities, and a stronger path toward a better future.</p>
-          <p className="lead mt-4">Our work focuses on education, healthcare, women and child welfare, livelihood development, environmental protection, food and nutrition, and humanitarian support. We believe meaningful change begins at the community level—by listening to people&apos;s needs, creating opportunities, and supporting individuals and families with dignity.</p>
-          <p className="lead mt-4">Through the involvement of volunteers, community members, supporters, and partners, we work to make essential resources and opportunities more accessible to those who need them most.</p>
-          <p className="mt-6 border-l-2 border-brand pl-4 text-base leading-7 text-brandDark">“Empowering Communities • Creating Opportunities • Building a Better Tomorrow”</p>
+          <h2 className="heading-lg text-brand">Who we are?</h2>
+          <p className="lead mt-5"><strong className="font-semibold text-ink">Navnikunj Foundation</strong> is a non-profit organization dedicated to empowering underserved communities and creating sustainable social impact. Guided by compassion, integrity, and social responsibility, we work to ensure that every individual has access to basic necessities, opportunities, and a life of dignity.</p>
+          <p className="lead mt-4">Our initiatives focus on <strong className="font-semibold text-ink">poverty alleviation, food and nutrition support, healthcare and medical assistance, education, skill development, women and child welfare, environmental sustainability, and community development</strong>. Through collaborative efforts and community-driven programs, we strive to uplift vulnerable populations, foster self-reliance, and build stronger, healthier communities.</p>
+          <p className="lead mt-4">At Navnikunj Foundation, we believe that meaningful change begins when people come together with a shared purpose. Every meal served, every child educated, and every life supported brings us one step closer to a more inclusive, compassionate, and hopeful future.</p>
+          <p className="mt-6 border-l-2 border-brand pl-4 text-base leading-7 text-brandDark">Together, we can make a difference.</p>
         </div>
         <img src={storyImage} alt="People gathered for a community program" className="h-80 w-full rounded-card object-cover shadow-card lg:h-full lg:max-h-[36rem]" />
       </section>
@@ -159,7 +158,7 @@ export default function AboutPage() {
           <p className="mt-3 text-lg leading-snug text-ink">Small Actions. Meaningful Change.</p>
           <p className="lead mt-5">At Navnikunj Foundation, we believe that lasting social change is created when people, communities, volunteers, and supporters come together with a shared purpose.</p>
           <p className="lead mt-4">Whether it is helping a child continue their education, supporting a family during a difficult time, empowering a woman with skills, caring for the environment, or standing beside communities during emergencies, every effort can contribute to a better tomorrow.</p>
-          <p className="mt-8 text-lg text-brand">Together for a Better Tomorrow.</p>
+          <p className="mt-8 text-lg text-brand">Together, we can make a difference.</p>
         </div>
       </section>
 

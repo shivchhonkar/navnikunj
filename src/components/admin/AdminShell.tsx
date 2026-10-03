@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { AdminNotice, useAdminNotice } from '@/components/admin/AdminNotice';
 import { CONTENT_SECTIONS } from '@/lib/admin-content';
 import { POST_SECTIONS } from '@/lib/admin-posts';
-import { Bell, Calendar, ExternalLink, FileText, HandCoins, Images, IndianRupee, LayoutDashboard, LogOut, Mail, Menu, MessageSquare, Newspaper, PanelLeft, Search, X } from 'lucide-react';
+import { Bell, Calendar, ChevronDown, ChevronRight, ExternalLink, FileText, HandCoins, Images, IndianRupee, LayoutDashboard, LogOut, Mail, Menu, MessageSquare, Newspaper, PanelLeft, Search, X } from 'lucide-react';
 
 const LINKS = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard },
@@ -43,65 +43,81 @@ function greetingFor(date: Date) {
   return 'Good evening';
 }
 
+function Submenu({
+  sections,
+  pathname,
+  onNavigate,
+}: {
+  sections: readonly { href: string; label: string }[];
+  pathname: string;
+  onNavigate?: () => void;
+}) {
+  return (
+    <div className="ml-5 mt-1 space-y-0.5 border-l border-white/15 pl-3">
+      {sections.map((section) => {
+        const sectionActive = pathname === section.href;
+        return (
+          <Link
+            key={section.href}
+            href={section.href}
+            aria-current={sectionActive ? 'page' : undefined}
+            onClick={onNavigate}
+            className={`block rounded-lg px-3 py-2 text-sm ${sectionActive ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
+          >
+            {section.label}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
 function NavLinks({ pathname, collapsed, onNavigate }: { pathname: string; collapsed: boolean; onNavigate?: () => void }) {
   const inContent = pathname === '/admin/content' || pathname.startsWith('/admin/content/');
   const inPosts = pathname === '/admin/posts' || pathname.startsWith('/admin/posts/');
+  const [contentOpen, setContentOpen] = useState(inContent);
+  const [postsOpen, setPostsOpen] = useState(inPosts);
+
+  useEffect(() => {
+    if (inContent) setContentOpen(true);
+    if (inPosts) setPostsOpen(true);
+  }, [inContent, inPosts]);
 
   return (
     <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3 py-4" aria-label="Admin">
       {LINKS.map((item) => {
         const Icon = item.icon;
         const active = pathname === item.href;
-        const contentOpen = item.href === '/admin/content' && inContent;
-        const postsOpen = item.href === '/admin/posts' && inPosts;
+        const sections = item.href === '/admin/content' ? CONTENT_SECTIONS : item.href === '/admin/posts' ? POST_SECTIONS : null;
+        const sectionOpen = item.href === '/admin/content' ? contentOpen : postsOpen;
+        const inSection = item.href === '/admin/content' ? inContent : inPosts;
+        const toggle = item.href === '/admin/content' ? () => setContentOpen((value) => !value) : () => setPostsOpen((value) => !value);
         return (
           <div key={item.href}>
-            <Link
-              href={item.href}
-              title={collapsed ? item.label : undefined}
-              aria-current={active ? 'page' : undefined}
-              onClick={onNavigate}
-              className={`flex items-center rounded-lg py-2.5 text-sm ${collapsed ? 'justify-center px-2' : 'gap-3 px-3'} ${active ? 'bg-brand text-white' : contentOpen || postsOpen ? 'text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
-            >
-              <Icon size={18} strokeWidth={1.75} />
-              {collapsed ? <span className="sr-only">{item.label}</span> : item.label}
-            </Link>
-            {!collapsed && item.href === '/admin/content' ? (
-              <div className="ml-5 mt-1 space-y-0.5 border-l border-white/15 pl-3">
-                {CONTENT_SECTIONS.map((section) => {
-                  const sectionActive = pathname === section.href;
-                  return (
-                    <Link
-                      key={section.href}
-                      href={section.href}
-                      aria-current={sectionActive ? 'page' : undefined}
-                      onClick={onNavigate}
-                      className={`block rounded-lg px-3 py-2 text-sm ${sectionActive ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
-                    >
-                      {section.label}
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : null}
-            {!collapsed && item.href === '/admin/posts' ? (
-              <div className="ml-5 mt-1 space-y-0.5 border-l border-white/15 pl-3">
-                {POST_SECTIONS.map((section) => {
-                  const sectionActive = pathname === section.href;
-                  return (
-                    <Link
-                      key={section.href}
-                      href={section.href}
-                      aria-current={sectionActive ? 'page' : undefined}
-                      onClick={onNavigate}
-                      className={`block rounded-lg px-3 py-2 text-sm ${sectionActive ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
-                    >
-                      {section.label}
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : null}
+            <div className={`flex items-center rounded-lg text-sm ${active ? 'bg-brand text-white' : inSection ? 'text-white' : 'text-white/80'}`}>
+              <Link
+                href={item.href}
+                title={collapsed ? item.label : undefined}
+                aria-current={active ? 'page' : undefined}
+                onClick={onNavigate}
+                className={`flex min-w-0 flex-1 items-center rounded-lg py-2.5 ${collapsed ? 'justify-center px-2' : 'gap-3 px-3'} ${active ? '' : 'hover:bg-white/10 hover:text-white'}`}
+              >
+                <Icon size={18} strokeWidth={1.75} />
+                {collapsed ? <span className="sr-only">{item.label}</span> : item.label}
+              </Link>
+              {!collapsed && sections ? (
+                <button
+                  type="button"
+                  aria-expanded={sectionOpen}
+                  aria-label={sectionOpen ? `Collapse ${item.label}` : `Expand ${item.label}`}
+                  onClick={toggle}
+                  className="mr-1 rounded-md p-2 text-white/70 hover:bg-white/10 hover:text-white"
+                >
+                  {sectionOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+              ) : null}
+            </div>
+            {!collapsed && sections && sectionOpen ? <Submenu sections={sections} pathname={pathname} onNavigate={onNavigate} /> : null}
           </div>
         );
       })}
@@ -209,7 +225,7 @@ export function AdminShell({ user, children }: { user: string; children: React.R
   const iconLink = 'rounded-lg p-2 text-stone-500 hover:bg-stone-100 hover:text-stone-800';
 
   return (
-    <div className="min-h-screen bg-stone-100">
+    <div className="min-h-screen bg-stone-100" style={{ '--admin-side': collapsed ? '4.5rem' : '16rem' } as CSSProperties}>
       <header className="sticky top-0 z-30 border-b border-stone-200 bg-white">
         <button
           type="button"

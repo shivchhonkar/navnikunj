@@ -87,11 +87,11 @@ export default function HomePage() {
         <div className="section shell grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
           <img src={aboutImage} alt="People gathered for a community program" className="h-80 w-full rounded-card object-cover shadow-card lg:h-[26rem]" />
           <div>
-            <p className="eyebrow">About us</p>
-            <h2 className="heading-lg mt-4 text-ink">Who We Are</h2>
-            <p className="mt-3 text-lg leading-snug text-ink">Working Together for a Better Tomorrow</p>
-            <p className="lead mt-4">Navnikunj Foundation is committed to creating positive and lasting change in communities by working with people who need support, opportunities, and a stronger path toward a better future.</p>
-            <p className="mt-5 border-l-2 border-brand pl-4 text-base leading-7 text-brandDark">“Empowering Communities • Creating Opportunities • Building a Better Tomorrow”</p>
+            <p className="eyebrow">Who we are</p>
+            <h2 className="heading-lg mt-4 text-ink">Who we are?</h2>
+            <p className="lead mt-4"><strong className="font-semibold text-ink">Navnikunj Foundation</strong> is a non-profit organization dedicated to empowering underserved communities and creating sustainable social impact. Guided by compassion, integrity, and social responsibility, we work to ensure that every individual has access to basic necessities, opportunities, and a life of dignity.</p>
+            <p className="lead mt-4">Our work covers <strong className="font-semibold text-ink">poverty alleviation, food and nutrition, healthcare, education, skill development, women and child welfare, environmental sustainability, and community development</strong>.</p>
+            <p className="mt-5 border-l-2 border-brand pl-4 text-base leading-7 text-brandDark">Together, we can make a difference.</p>
             <Link href="/about" className="btn btn-line mt-8">
               Our story <ArrowRight size={15} />
             </Link>

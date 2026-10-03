@@ -45,6 +45,7 @@ export function getSite() {
     donation.pan ||= '';
     donation.address ||= '';
     donation.country ||= '';
+    donation.method ||= '';
   }
   cache.gallery ||= [];
   cache.posts ||= [];
