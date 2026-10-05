@@ -27,7 +27,7 @@ const CEO = {
   name: 'Ashu Sharma',
   role: 'Co-Founder & Chief Executive Officer',
   quote: 'True change begins when compassion is transformed into action. Together, let us create opportunities, inspire hope, and build a future where every life can flourish.',
-  image: '',
+  image: '/images/team/ashu.jpeg',
 };
 
 const CHAIRMAN = {

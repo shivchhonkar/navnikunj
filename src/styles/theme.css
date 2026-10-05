@@ -147,6 +147,24 @@
   pointer-events: none;
 }
 
+.hero-blur-right {
+  filter: blur(18px);
+  transform: scale(1.08);
+  mask-image: linear-gradient(270deg, #000 0%, #000 34%, transparent 68%);
+  -webkit-mask-image: linear-gradient(270deg, #000 0%, #000 34%, transparent 68%);
+}
+
+.hero-wash-right {
+  background: linear-gradient(
+    270deg,
+    rgb(28 20 18 / 0.55) 0%,
+    rgb(28 20 18 / 0.4) 32%,
+    rgb(28 20 18 / 0.16) 56%,
+    transparent 74%
+  );
+  pointer-events: none;
+}
+
 @media (max-width: 767px) {
   .hero-blur {
     mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
@@ -155,6 +173,15 @@
 
   .hero-wash {
     background: linear-gradient(180deg, rgb(255 248 241 / 0.9) 0%, rgb(255 248 241 / 0.55) 64%, transparent 100%);
+  }
+
+  .hero-wash-right {
+    background: linear-gradient(180deg, rgb(28 20 18 / 0.55) 0%, rgb(28 20 18 / 0.32) 64%, transparent 100%);
+  }
+
+  .hero-blur-right {
+    mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
   }
 }
 
