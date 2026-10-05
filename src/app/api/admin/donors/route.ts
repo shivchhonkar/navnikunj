@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     status: 'paid' as const,
     at: new Date().toISOString(),
   };
-  updateSite((site) => {
+  await updateSite((site) => {
     site.donations.unshift(donor);
   });
   return json({ ok: true, donor });
@@ -44,7 +44,7 @@ export async function DELETE(request: Request) {
   const body = await request.json().catch(() => ({}));
   const id = text(body.id);
   if (!id) return fail('Choose a donor to remove');
-  updateSite((site) => {
+  await updateSite((site) => {
     site.donations = site.donations.filter((item) => item.id !== id);
   });
   return json({ ok: true });

@@ -1,4 +1,4 @@
-import { BookOpen, HandHeart, HeartPulse, Sprout, Users, type LucideIcon } from 'lucide-react';
+import { BookOpen, HandHeart, HeartPulse, LifeBuoy, Sprout, Users, type LucideIcon } from 'lucide-react';
 import type { ProgramIcon } from './types';
 
 export const PROGRAM_ICONS: Record<ProgramIcon, LucideIcon> = {
@@ -7,6 +7,16 @@ export const PROGRAM_ICONS: Record<ProgramIcon, LucideIcon> = {
   users: Users,
   sprout: Sprout,
   heart: HandHeart,
+  relief: LifeBuoy,
 };
 
-export const ICON_OPTIONS: ProgramIcon[] = ['book', 'health', 'users', 'sprout', 'heart'];
+export const ICON_OPTIONS: ProgramIcon[] = ['book', 'health', 'users', 'sprout', 'heart', 'relief'];
+
+export const ICON_LABELS: Record<ProgramIcon, string> = {
+  book: 'Book',
+  health: 'Health',
+  users: 'People',
+  sprout: 'Plant',
+  heart: 'Care',
+  relief: 'Relief',
+};

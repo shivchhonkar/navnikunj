@@ -20,10 +20,11 @@ import {
   Wheat,
   Wrench,
 } from 'lucide-react';
+import { PageBanner } from '@/components/PageBanner';
+import { bannerFor } from '@/lib/banners';
 import { getSite } from '@/lib/store';
 import type { LucideIcon } from 'lucide-react';
 
-const BANNER_PHOTO = '/images/banner_images/banner-poor-childrens.jpeg';
 const STORY_PHOTO = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1400&q=80';
 
 const AREAS: { title: string; text: string; icon: LucideIcon }[] = [
@@ -57,22 +58,13 @@ export const metadata: Metadata = {
   alternates: { canonical: '/about' },
 };
 
-export default function AboutPage() {
-  const site = getSite();
+export default async function AboutPage() {
+  const site = await getSite();
   const storyImage = site.about.image || STORY_PHOTO;
 
   return (
     <main>
-      <section className="relative isolate overflow-hidden text-white">
-        <img src={BANNER_PHOTO} alt="" className="absolute inset-0 h-full w-full object-cover object-left" />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink/15 via-ink/45 to-ink/75" />
-        <div className="shell relative flex min-h-[13rem] items-center py-12 md:min-h-[17rem] md:justify-end">
-          <div className="max-w-lg md:text-right">
-            <h1 className="heading-xl">About Us</h1>
-            <p className="mt-3 text-base text-white/90 sm:text-lg">Together, we can make a difference.</p>
-          </div>
-        </div>
-      </section>
+      <PageBanner banner={bannerFor(site.banners, 'about')} />
 
       <section className="section shell grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
         <div>

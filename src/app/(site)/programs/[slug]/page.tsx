@@ -6,14 +6,14 @@ import { getSite } from '@/lib/store';
 
 type Params = { params: { slug: string } };
 
-export function generateMetadata({ params }: Params): Metadata {
-  const program = getSite().programs.find((item) => item.slug === params.slug);
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const program = (await getSite()).programs.find((item) => item.slug === params.slug);
   if (!program) return { title: 'Program' };
   return { title: program.title, description: program.summary, alternates: { canonical: `/programs/${program.slug}` } };
 }
 
-export default function ProgramPage({ params }: Params) {
-  const program = getSite().programs.find((item) => item.slug === params.slug);
+export default async function ProgramPage({ params }: Params) {
+  const program = (await getSite()).programs.find((item) => item.slug === params.slug);
   if (!program) notFound();
   const Icon = PROGRAM_ICONS[program.icon] || PROGRAM_ICONS.heart;
   return (

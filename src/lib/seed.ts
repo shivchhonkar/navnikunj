@@ -1,10 +1,13 @@
-import { hashPassword } from './password';
+import { defaultBanners } from './banners';
+import { defaultHome } from './home';
+import { PROGRAM_PHOTOS } from './programs';
+import { DEMO_PASSWORD, hashPassword } from './password';
 import type { SiteData } from './types';
 
-export function createSeed(): SiteData {
+function buildSite(passwordHash: string): SiteData {
   return {
     adminUser: 'admin',
-    passwordHash: hashPassword('Navnikunj@123'),
+    passwordHash,
     identity: {
       name: 'Navnikunj Foundation',
       tagline: 'Kindness · Hope · Better tomorrows',
@@ -15,6 +18,8 @@ export function createSeed(): SiteData {
       phoneHref2: '+919720202650',
       address: 'NAVNIKUNJ FOUNDATION\nLIG-12A/107, Suncity Anantam Kunj, Vrindaban,\nMathura- 281121, Uttar Pradesh, India',
       mapQuery: 'LIG-12A/107, Suncity Anantam Kunj, Vrindaban, Mathura 281121, Uttar Pradesh, India',
+      latitude: '',
+      longitude: '',
       facebook: '',
       instagram: '',
       youtube: '',
@@ -25,6 +30,14 @@ export function createSeed(): SiteData {
       title: 'Kindness that opens a better tomorrow',
       text: 'We stand with families who need a school place, a health visit, a meal, or a skill they can use. Every gift is tracked, and every program is built to last beyond a single day.',
       image: '/images/banner_images/banner-poor-childrens.jpeg',
+      slides: [
+        {
+          id: 'hero_1',
+          title: 'Kindness that opens a better tomorrow',
+          text: 'We stand with families who need a school place, a health visit, a meal, or a skill they can use. Every gift is tracked, and every program is built to last beyond a single day.',
+          image: '/images/banner_images/banner-poor-childrens.jpeg',
+        },
+      ],
     },
     stats: [
       { value: '1,200+', label: 'People supported' },
@@ -43,46 +56,62 @@ export function createSeed(): SiteData {
       title: 'Be part of the change',
       text: 'Your support keeps school kits, health camps, and family relief moving. Give once, or come back when you can.',
     },
+    home: defaultHome(),
+    banners: defaultBanners(),
     programs: [
       {
-        id: 'pg_learn',
-        slug: 'learning-support',
-        title: 'Learning support',
-        summary: 'School kits, fees, and after-school help so children can stay in class.',
-        body: 'Learning support covers notebooks, uniforms, fee help, and a quiet hour after school with a volunteer. We work with families who would otherwise pull a child out of class when money runs short.',
+        id: 'pg_poverty',
+        slug: 'poverty-alleviation',
+        title: 'Poverty alleviation',
+        summary: 'Food, essentials, and steady support for families working through a hard stretch.',
+        body: 'Poverty alleviation covers ration support, daily essentials, and a follow-up when a household is short of what it needs to get through the month. The help is personal and recorded.',
+        image: PROGRAM_PHOTOS['poverty-alleviation'],
+        icon: 'heart',
+      },
+      {
+        id: 'pg_education',
+        slug: 'education-and-skill-development',
+        title: 'Education and skill development',
+        summary: 'School kits, fees, and practical training so children stay in class and young people can earn.',
+        body: 'Education and skill development covers notebooks, uniforms, fee help, and short courses in communication, computer basics, and local trades. The aim is a child who stays in school and a learner ready for a first job.',
+        image: PROGRAM_PHOTOS['education-and-skill-development'],
         icon: 'book',
       },
       {
         id: 'pg_health',
-        slug: 'community-health',
-        title: 'Community health',
-        summary: 'Health camps and basic care close to the neighbourhoods we serve.',
-        body: 'Community health days bring a doctor, basic checks, and clear next steps. We tell families what was found and where to go if more care is needed.',
+        slug: 'community-health-and-nutrition',
+        title: 'Community health and nutrition',
+        summary: 'Health camps, basic care, and nutritious food close to the neighbourhoods we serve.',
+        body: 'Community health and nutrition days bring a doctor, basic checks, and food support that keeps a family fed. We tell people what was found and where to go if more care is needed.',
+        image: PROGRAM_PHOTOS['community-health-and-nutrition'],
         icon: 'health',
       },
       {
-        id: 'pg_relief',
-        slug: 'family-relief',
-        title: 'Family relief',
-        summary: 'Food and daily essentials for households in a hard month.',
-        body: 'When work stops or a bill lands at the wrong time, a ration kit and a follow-up visit keep a household going. Relief is short, personal, and recorded.',
-        icon: 'heart',
-      },
-      {
-        id: 'pg_skills',
-        slug: 'skills-for-work',
-        title: 'Skills for work',
-        summary: 'Practical training that helps young people earn a steady income.',
-        body: 'Short courses in communication, computer basics, and local trades are paired with a mentor. The goal is a first job or a small service the learner can offer.',
+        id: 'pg_welfare',
+        slug: 'women-and-child-welfare',
+        title: 'Women and child welfare',
+        summary: 'Care, learning, and livelihood support that keeps women and children safer and more able.',
+        body: 'Women and child welfare supports education, nutrition, safety, and a chance for women to build a skill or a small livelihood. Children are included so care and learning travel together.',
+        image: PROGRAM_PHOTOS['women-and-child-welfare'],
         icon: 'users',
       },
       {
-        id: 'pg_green',
-        slug: 'green-neighbourhoods',
-        title: 'Green neighbourhoods',
+        id: 'pg_environment',
+        slug: 'environmental-sustainability',
+        title: 'Environmental sustainability',
         summary: 'Tree planting and clean-up drives that leave a street better than we found it.',
-        body: 'Volunteers plant, water, and clear shared corners. Children join so the habit of looking after a place starts early.',
+        body: 'Environmental sustainability brings neighbours together to plant, water, and clear shared corners. Children join so looking after a place becomes a habit.',
+        image: PROGRAM_PHOTOS['environmental-sustainability'],
         icon: 'sprout',
+      },
+      {
+        id: 'pg_disaster',
+        slug: 'disaster-relief',
+        title: 'Disaster relief',
+        summary: 'Food, shelter basics, and a follow-up visit when a flood, fire, or other emergency hits.',
+        body: 'Disaster relief moves quickly with food, daily essentials, and a check on households after the first shock. The help is short, practical, and recorded.',
+        image: PROGRAM_PHOTOS['disaster-relief'],
+        icon: 'relief',
       },
     ],
     posts: [
@@ -129,5 +158,18 @@ export function createSeed(): SiteData {
     gallery: [],
     messages: [],
     donations: [],
+    volunteers: [],
+    users: [],
+    images: [],
+    reports: [],
+    pages: [],
   };
+}
+
+export function blankSite() {
+  return buildSite('');
+}
+
+export function createSeed(): SiteData {
+  return buildSite(hashPassword(DEMO_PASSWORD));
 }

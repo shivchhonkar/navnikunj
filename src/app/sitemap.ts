@@ -1,10 +1,10 @@
 import type { MetadataRoute } from 'next';
 import { getSite, siteUrl } from '@/lib/store';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const site = getSite();
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const site = await getSite();
   const root = siteUrl();
-  const staticPaths = ['', '/about', '/work', '/programs', '/gallery', '/news', '/contact', '/donate'];
+  const staticPaths = ['', '/about', '/team', '/work', '/programs', '/gallery', '/news', '/contact', '/donate'];
   const pages: MetadataRoute.Sitemap = staticPaths.map((path) => ({
     url: `${root}${path || '/'}`,
     changeFrequency: 'weekly',

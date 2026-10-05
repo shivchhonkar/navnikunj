@@ -6,23 +6,24 @@ import { CSSProperties, FormEvent, useEffect, useMemo, useRef, useState } from '
 import { AdminNotice, useAdminNotice } from '@/components/admin/AdminNotice';
 import { CONTENT_SECTIONS } from '@/lib/admin-content';
 import { POST_SECTIONS } from '@/lib/admin-posts';
-import { Bell, Calendar, ChevronDown, ChevronRight, ExternalLink, FileText, HandCoins, Images, IndianRupee, LayoutDashboard, LogOut, Mail, Menu, MessageSquare, Newspaper, PanelLeft, Search, X } from 'lucide-react';
+import { BarChart3, Bell, Calendar, ChevronDown, ChevronRight, ExternalLink, FileImage, FileText, Files, HandCoins, Images, IndianRupee, LayoutDashboard, LogOut, Mail, Menu, MessageSquare, Newspaper, PanelLeft, Search, UserRound, Users, X } from 'lucide-react';
 
 const LINKS = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard },
   { href: '/admin/content', label: 'Content', icon: FileText },
+  { href: '/admin/pages', label: 'Pages', icon: Files },
   { href: '/admin/posts', label: 'News & events', icon: Newspaper },
   { href: '/admin/gallery', label: 'Gallery', icon: Images },
+  { href: '/admin/images', label: 'Images', icon: FileImage },
   { href: '/admin/messages', label: 'Messages', icon: Mail },
   { href: '/admin/donations', label: 'Donations', icon: IndianRupee },
   { href: '/admin/donors', label: 'Donors', icon: HandCoins },
+  { href: '/admin/volunteers', label: 'Volunteers', icon: Users },
+  { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
+  { href: '/admin/users', label: 'Users', icon: UserRound },
 ];
 
-const SEARCH_ITEMS = [
-  ...LINKS.map((item) => ({ href: item.href, label: item.label, group: 'Desk' })),
-  ...CONTENT_SECTIONS.map((section) => ({ href: section.href, label: section.label, group: 'Content' })),
-  ...POST_SECTIONS.map((section) => ({ href: section.href, label: section.label, group: 'Posts' })),
-];
+type DeskLink = (typeof LINKS)[number];
 
 function displayName(user: string) {
   const clean = user.trim();
@@ -72,7 +73,7 @@ function Submenu({
   );
 }
 
-function NavLinks({ pathname, collapsed, onNavigate }: { pathname: string; collapsed: boolean; onNavigate?: () => void }) {
+function NavLinks({ pathname, collapsed, onNavigate, links }: { pathname: string; collapsed: boolean; onNavigate?: () => void; links: DeskLink[] }) {
   const inContent = pathname === '/admin/content' || pathname.startsWith('/admin/content/');
   const inPosts = pathname === '/admin/posts' || pathname.startsWith('/admin/posts/');
   const [contentOpen, setContentOpen] = useState(inContent);
@@ -85,7 +86,7 @@ function NavLinks({ pathname, collapsed, onNavigate }: { pathname: string; colla
 
   return (
     <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3 py-4" aria-label="Admin">
-      {LINKS.map((item) => {
+      {links.map((item) => {
         const Icon = item.icon;
         const active = pathname === item.href;
         const sections = item.href === '/admin/content' ? CONTENT_SECTIONS : item.href === '/admin/posts' ? POST_SECTIONS : null;
@@ -125,7 +126,7 @@ function NavLinks({ pathname, collapsed, onNavigate }: { pathname: string; colla
   );
 }
 
-export function AdminShell({ user, children }: { user: string; children: React.ReactNode }) {
+export function AdminShell({ user, role = 'admin', children }: { user: string; role?: string; children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchRef = useRef<HTMLInputElement>(null);
@@ -169,11 +170,17 @@ export function AdminShell({ user, children }: { user: string; children: React.R
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  const links = role === 'admin' ? LINKS : LINKS.filter((item) => item.href !== '/admin/users');
+  const searchItems = useMemo(() => [
+    ...links.map((item) => ({ href: item.href, label: item.label, group: 'Desk' })),
+    ...CONTENT_SECTIONS.map((section) => ({ href: section.href, label: section.label, group: 'Content' })),
+    ...POST_SECTIONS.map((section) => ({ href: section.href, label: section.label, group: 'Posts' })),
+  ], [links]);
   const matches = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    if (!needle) return SEARCH_ITEMS;
-    return SEARCH_ITEMS.filter((item) => `${item.label} ${item.group}`.toLowerCase().includes(needle));
-  }, [query]);
+    if (!needle) return searchItems;
+    return searchItems.filter((item) => `${item.label} ${item.group}`.toLowerCase().includes(needle));
+  }, [query, searchItems]);
 
   const goTo = (href: string) => {
     setSearchOpen(false);
@@ -306,7 +313,7 @@ export function AdminShell({ user, children }: { user: string; children: React.R
 
       <div className="flex">
         <aside className={`relative sticky top-16 hidden h-[calc(100vh-4rem)] shrink-0 flex-col bg-[#16100e] transition-[width] duration-200 lg:flex ${collapsed ? 'w-[4.5rem]' : 'w-64'}`}>
-          <NavLinks pathname={pathname} collapsed={collapsed} />
+          <NavLinks pathname={pathname} collapsed={collapsed} links={links} />
           {actions}
         </aside>
 
@@ -323,7 +330,7 @@ export function AdminShell({ user, children }: { user: string; children: React.R
                   <X size={18} />
                 </button>
               </div>
-              <NavLinks pathname={pathname} collapsed={false} onNavigate={() => setOpen(false)} />
+              <NavLinks pathname={pathname} collapsed={false} onNavigate={() => setOpen(false)} links={links} />
               <div className="space-y-1 border-t border-white/10 p-3">
                 <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/80 hover:bg-white/10 hover:text-white">
                   <ExternalLink size={18} strokeWidth={1.75} />

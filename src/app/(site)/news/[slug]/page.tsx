@@ -11,8 +11,8 @@ type Params = { params: { slug: string } };
 
 const KIND_LABEL = { news: 'News', blog: 'Blog', event: 'Event' };
 
-function publishedPost(slug: string) {
-  return getSite().posts.find((item) => item.slug === slug && item.published);
+async function publishedPost(slug: string) {
+  return (await getSite()).posts.find((item) => item.slug === slug && item.published);
 }
 
 function articleJsonLd(post: Post, pageUrl: string, image: string, publisher: string) {
@@ -51,10 +51,10 @@ function articleJsonLd(post: Post, pageUrl: string, image: string, publisher: st
   };
 }
 
-export function generateMetadata({ params }: Params): Metadata {
-  const post = publishedPost(params.slug);
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const post = await publishedPost(params.slug);
   if (!post) return { title: 'Update' };
-  const site = getSite();
+  const site = await getSite();
   const pageUrl = `${siteUrl()}/news/${post.slug}`;
   const image = postPhoto(post);
   return {
@@ -80,9 +80,9 @@ export function generateMetadata({ params }: Params): Metadata {
   };
 }
 
-export default function NewsArticle({ params }: Params) {
-  const site = getSite();
-  const post = publishedPost(params.slug);
+export default async function NewsArticle({ params }: Params) {
+  const site = await getSite();
+  const post = await publishedPost(params.slug);
   if (!post) notFound();
 
   const pageUrl = `${siteUrl()}/news/${post.slug}`;

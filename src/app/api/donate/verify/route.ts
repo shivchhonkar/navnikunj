@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   const valid = expected.length === signature.length && timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
   const payment = await fetchRazorpayPayment(paymentId);
   let receipt: DonationReceipt | null = null;
-  updateSite((site) => {
+  await updateSite((site) => {
     const row = site.donations.find((item) => item.orderId === orderId);
     if (!row) return;
     applyPayment(row, payment, paymentId);

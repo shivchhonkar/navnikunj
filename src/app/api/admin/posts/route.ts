@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   if (!title) return fail('Title is required');
   const kind: PostKind = KINDS.has(text(body.kind)) ? text(body.kind) as PostKind : 'news';
   const id = `post_${randomBytes(4).toString('hex')}`;
-  updateSite((site) => {
+  await updateSite((site) => {
     let slug = slugify(title);
     if (site.posts.some((item) => item.slug === slug)) slug = `${slug}-${id.slice(-4)}`;
     site.posts.unshift({

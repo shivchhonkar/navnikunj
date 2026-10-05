@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   if (!orderId) return fail('Missing payment attempt');
   const payment = paymentId ? await fetchRazorpayPayment(paymentId) : null;
   let receipt = null as ReturnType<typeof donationReceipt> | null;
-  updateSite((site) => {
+  await updateSite((site) => {
     const row = site.donations.find((item) => item.orderId === orderId);
     if (!row || row.status === 'paid') return;
     applyPayment(row, payment, paymentId);

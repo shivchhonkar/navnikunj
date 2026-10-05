@@ -1,4 +1,19 @@
-export type ProgramIcon = 'book' | 'health' | 'users' | 'sprout' | 'heart';
+export type HomePageSettings = {
+  stats: { visible: boolean; image: string };
+  work: { visible: boolean; eyebrow: string; title: string; text: string; linkLabel: string; cardLabel: string };
+  about: { visible: boolean; eyebrow: string; title: string; text: string; detail: string; quote: string; image: string; linkLabel: string };
+  donation: { visible: boolean; image: string; buttonLabel: string };
+  news: { visible: boolean; eyebrow: string; title: string; linkLabel: string };
+};
+
+export type HeroSlide = {
+  id: string;
+  title: string;
+  text: string;
+  image: string;
+};
+
+export type ProgramIcon = 'book' | 'health' | 'users' | 'sprout' | 'heart' | 'relief';
 export type PostKind = 'blog' | 'news' | 'event';
 
 export type Program = {
@@ -7,6 +22,7 @@ export type Program = {
   title: string;
   summary: string;
   body: string;
+  image: string;
   icon: ProgramIcon;
 };
 
@@ -56,6 +72,69 @@ export type Donation = {
   at: string;
 };
 
+export type VolunteerStatus = 'applied' | 'active' | 'inactive';
+export type UserRole = 'admin' | 'editor';
+export type ReportKind = 'overview' | 'donations' | 'donors' | 'volunteers' | 'events';
+export type ReportStatus = 'draft' | 'published';
+
+export type Volunteer = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  city: string;
+  skills: string;
+  availability: string;
+  status: VolunteerStatus;
+  notes: string;
+  at: string;
+};
+
+export type AppUser = {
+  id: string;
+  username: string;
+  displayName: string;
+  email: string;
+  role: UserRole;
+  active: boolean;
+  at: string;
+};
+
+export type AuthUser = AppUser & { passwordHash: string };
+
+export type ImageAsset = {
+  id: string;
+  filename: string;
+  url: string;
+  alt: string;
+  size: number;
+  type: string;
+  caption: string;
+  entityType: string;
+  entityId: string;
+  at: string;
+};
+
+export type Report = {
+  id: string;
+  title: string;
+  kind: ReportKind;
+  periodStart: string;
+  periodEnd: string;
+  summary: string;
+  payload: Record<string, number | string>;
+  status: ReportStatus;
+  at: string;
+};
+
+export type ManagedPage = {
+  slug: string;
+  title: string;
+  kind: string;
+  published: boolean;
+  updatedAt: string;
+};
+
 export type DonationReceipt = {
   status: 'paid' | 'failed';
   name: string;
@@ -84,18 +163,27 @@ export type SiteData = {
     phoneHref2: string;
     address: string;
     mapQuery: string;
+    latitude: string;
+    longitude: string;
     facebook: string;
     instagram: string;
     youtube: string;
     linkedin: string;
   };
-  hero: { eyebrow: string; title: string; text: string; image: string };
+  hero: { eyebrow: string; title: string; text: string; image: string; slides: HeroSlide[] };
   stats: { value: string; label: string }[];
   about: { eyebrow: string; title: string; text: string; quote: string; image: string };
   cta: { title: string; text: string };
+  home: HomePageSettings;
+  banners: { slug: string; title: string; text: string; image: string }[];
   programs: Program[];
   posts: Post[];
   gallery: GalleryImage[];
   messages: ContactMessage[];
   donations: Donation[];
+  volunteers: Volunteer[];
+  users: AppUser[];
+  images: ImageAsset[];
+  reports: Report[];
+  pages: ManagedPage[];
 };

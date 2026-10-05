@@ -5,7 +5,7 @@ import type { SiteData } from '@/lib/types';
 const LINKS = [
   { href: '/', label: 'Home' },
   { href: '/about', label: 'About Us' },
-  { href: '/work', label: 'Our Work' },
+  { href: '/team', label: 'Our Team' },
   { href: '/programs', label: 'Programs' },
   { href: '/gallery', label: 'Gallery' },
   { href: '/news', label: 'News & Updates' },
@@ -24,8 +24,8 @@ export function SiteFooter({ identity }: { identity: SiteData['identity'] }) {
     <footer className="site-chrome">
       <div className="shell grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-4">
         <div>
-          <img src="/images/logo.svg" alt="" className="h-24 w-auto rounded-xl bg-white object-contain p-2" />
-          <p className="mt-4 text-sm leading-6 text-white/80">{identity.tagline}</p>
+          <img src="/images/logo.svg" alt="" className="h-40 w-auto rounded-xl bg-white object-contain p-2" />
+          {/* <p className="mt-4 text-sm leading-6 text-white/80">{identity.tagline}</p> */}
         </div>
         <div>
           <h2 className="text-sm uppercase tracking-wide text-white">Explore</h2>

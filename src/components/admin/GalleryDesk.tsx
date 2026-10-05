@@ -46,7 +46,7 @@ export function GalleryDesk({ images }: { images: GalleryImage[] }) {
       const saved = await fetch('/api/admin/gallery', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ src: fileData.url, alt: data.get('alt'), caption: data.get('caption') }),
+        body: JSON.stringify({ id: fileData.id, src: fileData.url, alt: data.get('alt'), caption: data.get('caption') }),
       });
       const savedData = await saved.json().catch(() => ({}));
       if (!saved.ok || !savedData.image) {

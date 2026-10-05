@@ -3,6 +3,7 @@ import { mkdirSync, writeFileSync } from 'fs';
 import path from 'path';
 import { isAdmin } from '@/lib/auth';
 import { fail, json } from '@/lib/http';
+import { recordImage } from '@/lib/records';
 
 const TYPES: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -20,8 +21,20 @@ export async function POST(request: Request) {
   if (!ext) return fail('Use a JPG, PNG, WEBP, or GIF image');
   if (file.size > 5 * 1024 * 1024) return fail('Images must be 5 MB or smaller');
   const name = `${Date.now()}-${randomBytes(3).toString('hex')}.${ext}`;
+  const id = `img_${randomBytes(4).toString('hex')}`;
   const dir = path.join(process.cwd(), 'public', 'uploads');
   mkdirSync(dir, { recursive: true });
   writeFileSync(path.join(dir, name), Buffer.from(await file.arrayBuffer()));
-  return json({ ok: true, url: `/uploads/${name}` });
+  const url = `/uploads/${name}`;
+  await recordImage({
+    id,
+    filename: name,
+    url,
+    alt: '',
+    size: file.size,
+    type: file.type,
+    entityType: 'library',
+    entityId: '',
+  });
+  return json({ ok: true, url, id, filename: name, size: file.size, type: file.type });
 }

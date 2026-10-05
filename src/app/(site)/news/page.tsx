@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { PageBanner } from '@/components/PageBanner';
 import { PostCard } from '@/components/PostCard';
+import { bannerFor } from '@/lib/banners';
 import { getSite } from '@/lib/store';
 import type { PostKind } from '@/lib/types';
-
-const BANNER_PHOTO = '/images/banner_images/banner-poor-childrens.jpeg';
 
 export const metadata: Metadata = {
   title: 'News and updates',
@@ -19,24 +19,16 @@ const FILTERS: { href: string; label: string; kind?: PostKind }[] = [
   { href: '/news?kind=event', label: 'Events' },
 ];
 
-export default function NewsPage({ searchParams }: { searchParams: { kind?: string } }) {
+export default async function NewsPage({ searchParams }: { searchParams: { kind?: string } }) {
   const kind = FILTERS.some((item) => item.kind === searchParams.kind) ? searchParams.kind as PostKind : undefined;
-  const posts = getSite().posts
+  const site = await getSite();
+  const posts = site.posts
     .filter((post) => post.published && (!kind || post.kind === kind))
     .sort((a, b) => b.date.localeCompare(a.date));
 
   return (
     <main>
-      <section className="relative isolate overflow-hidden text-white">
-        <img src={BANNER_PHOTO} alt="" className="absolute inset-0 h-full w-full object-cover object-[center_30%]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink/15 via-ink/45 to-ink/75" />
-        <div className="shell relative flex min-h-[13rem] items-center py-12 md:min-h-[17rem] md:justify-end">
-          <div className="max-w-lg md:text-right">
-            <h1 className="heading-xl">News & Updates</h1>
-            <p className="mt-3 text-base text-white/90 sm:text-lg">Stories, notes, and upcoming gatherings</p>
-          </div>
-        </div>
-      </section>
+      <PageBanner banner={bannerFor(site.banners, 'news')} />
 
       <section className="section shell">
         <div className="flex flex-wrap gap-2">

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { GalleryView } from '@/components/GalleryView';
+import { PageBanner } from '@/components/PageBanner';
+import { bannerFor } from '@/lib/banners';
 import { getSite } from '@/lib/store';
-
-const BANNER_PHOTO = '/images/banner_images/banner-poor-childrens.jpeg';
 
 export const metadata: Metadata = {
   title: 'Gallery',
@@ -10,20 +10,12 @@ export const metadata: Metadata = {
   alternates: { canonical: '/gallery' },
 };
 
-export default function GalleryPage() {
-  const images = getSite().gallery;
+export default async function GalleryPage() {
+  const site = await getSite();
+  const images = site.gallery;
   return (
     <main>
-      <section className="relative isolate overflow-hidden text-white">
-        <img src={BANNER_PHOTO} alt="" className="absolute inset-0 h-full w-full object-cover object-[center_40%]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink/15 via-ink/45 to-ink/75" />
-        <div className="shell relative flex min-h-[13rem] items-center py-12 md:min-h-[17rem] md:justify-end">
-          <div className="max-w-lg md:text-right">
-            <h1 className="heading-xl">Gallery</h1>
-            <p className="mt-3 text-base text-white/90 sm:text-lg">Photographs from programs, visits, and community work</p>
-          </div>
-        </div>
-      </section>
+      <PageBanner banner={bannerFor(site.banners, 'gallery')} />
       <div className="section shell">
         {images.length ? (
           <GalleryView images={images} />

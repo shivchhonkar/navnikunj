@@ -1,7 +1,7 @@
 import { getSite } from '@/lib/store';
 
-export default function MessagesPage() {
-  const messages = getSite().messages;
+export default async function MessagesPage() {
+  const messages = (await getSite()).messages;
   return (
     <main>
       <h1 className="text-3xl">Messages</h1>

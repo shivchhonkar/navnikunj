@@ -5,8 +5,8 @@ import './globals.css';
 
 export const dynamic = 'force-dynamic';
 
-export function generateMetadata(): Metadata {
-  const site = getSite();
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSite();
   const url = siteUrl();
   return {
     metadataBase: new URL(url),
@@ -24,12 +24,12 @@ export function generateMetadata(): Metadata {
       siteName: site.identity.name,
     },
     twitter: { card: 'summary_large_image', title: site.identity.name, description: site.hero.text, images: ['/logo.jpg'] },
-    icons: { icon: '/images/logo.svg' },
+    icons: { icon: { url: '/images/LOGO_NT.svg', type: 'image/svg+xml' } },
   };
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const site = getSite();
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const site = await getSite();
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'NGO',

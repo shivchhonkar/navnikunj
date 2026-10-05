@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { ArrowRight, BadgeCheck, BookOpen, Heart, Users } from 'lucide-react';
+import { HeroBanner } from '@/components/HeroBanner';
 import { ProgramSlider } from '@/components/ProgramSlider';
 import { getSite } from '@/lib/store';
 
-const HERO_PHOTO = '/images/banner_images/banner-poor-childrens.jpeg';
 const ABOUT_PHOTO = '/images/banner_images/banner-poor-childrens.jpeg';
 
 const STORY_PHOTOS = [
@@ -23,35 +23,19 @@ function storyDate(value: string) {
   };
 }
 
-export default function HomePage() {
-  const site = getSite();
+export default async function HomePage() {
+  const site = await getSite();
   const posts = site.posts.filter((post) => post.published).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
-  const heroImage = site.hero.image || HERO_PHOTO;
-  const aboutImage = site.about.image || ABOUT_PHOTO;
+  const home = site.home;
+  const aboutImage = home.about.image || site.about.image || ABOUT_PHOTO;
 
   return (
     <main>
-      <section className="relative isolate overflow-hidden">
-        <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <img src={heroImage} alt="" className="hero-blur absolute inset-0 h-full w-full object-cover" />
-        <div className="hero-wash absolute inset-0" />
-        <div className="shell relative flex min-h-[16rem] items-center py-10 md:min-h-[20rem]">
-          <div className="max-w-xl">
-            <p className="eyebrow">{site.hero.eyebrow}</p>
-            <h1 className="heading-xl mt-5 max-w-lg text-ink">{site.hero.title}</h1>
-            <p className="mt-5 max-w-md text-base leading-7 text-ink/80 sm:text-lg">{site.hero.text}</p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/donate" className="btn btn-brand">
-                Support our mission <ArrowRight size={16} />
-              </Link>
-              <Link href="/about" className="btn btn-line">Learn more</Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroBanner eyebrow={site.hero.eyebrow} slides={site.hero.slides} />
 
+      {home.stats.visible && site.stats.length ? (
       <section className="relative overflow-hidden border-b border-line bg-[#FCF2E4]" aria-label="Impact">
-        <img src="/images/bg_images/stats_bg.png" alt="" className="pointer-events-none absolute left-1/2 top-0 h-full w-[112%] max-w-none -translate-x-1/2 object-fill" />
+        <img src={home.stats.image || '/images/bg_images/stats_bg.png'} alt="" className="pointer-events-none absolute left-1/2 top-0 h-full w-[112%] max-w-none -translate-x-1/2 object-fill" />
         <dl className="relative mx-auto grid w-full max-w-[76rem] grid-cols-2 px-[18%] md:grid-cols-4 md:px-[11%]">
           {site.stats.map((item, index) => {
             const Icon = STAT_ICONS[index % STAT_ICONS.length];
@@ -67,60 +51,74 @@ export default function HomePage() {
           })}
         </dl>
       </section>
+      ) : null}
 
+      {home.work.visible ? (
       <section className="section">
         <div className="shell mx-auto max-w-2xl text-center">
-          <p className="eyebrow">Our focus areas</p>
+          {home.work.eyebrow ? <p className="eyebrow">{home.work.eyebrow}</p> : null}
           <div className="mx-auto mt-4 h-px w-12 bg-brand" />
-          <h2 className="heading-lg mt-5 text-ink">Where the work goes</h2>
-          <p className="lead mt-4">Learning, health, family relief, work skills, and cleaner shared places. Open a program to see what it covers.</p>
+          <h2 className="heading-lg mt-5 text-ink">{home.work.title}</h2>
+          {home.work.text ? <p className="lead mt-4">{home.work.text}</p> : null}
         </div>
-        <ProgramSlider programs={site.programs} />
-        <div className="shell mt-8 text-center">
-          <Link href="/programs" className="inline-flex items-center gap-1 text-sm text-brand hover:text-brandDark">
-            See all programs <ArrowRight size={14} />
-          </Link>
-        </div>
+        <ProgramSlider programs={site.programs} linkLabel={home.work.cardLabel} />
+        {home.work.linkLabel ? (
+          <div className="shell mt-8 text-center">
+            <Link href="/programs" className="inline-flex items-center gap-1 text-sm text-brand hover:text-brandDark">
+              {home.work.linkLabel} <ArrowRight size={14} />
+            </Link>
+          </div>
+        ) : null}
       </section>
+      ) : null}
 
+      {home.about.visible ? (
       <section className="bg-paper">
         <div className="section shell grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
-          <img src={aboutImage} alt="People gathered for a community program" className="h-80 w-full rounded-card object-cover shadow-card lg:h-[26rem]" />
+          <img src={aboutImage} alt="" className="h-80 w-full rounded-card object-cover shadow-card lg:h-[26rem]" />
           <div>
-            <p className="eyebrow">Who we are</p>
-            <h2 className="heading-lg mt-4 text-ink">Who we are?</h2>
-            <p className="lead mt-4"><strong className="font-semibold text-ink">Navnikunj Foundation</strong> is a non-profit organization dedicated to empowering underserved communities and creating sustainable social impact. Guided by compassion, integrity, and social responsibility, we work to ensure that every individual has access to basic necessities, opportunities, and a life of dignity.</p>
-            <p className="lead mt-4">Our work covers <strong className="font-semibold text-ink">poverty alleviation, food and nutrition, healthcare, education, skill development, women and child welfare, environmental sustainability, and community development</strong>.</p>
-            <p className="mt-5 border-l-2 border-brand pl-4 text-base leading-7 text-brandDark">Together, we can make a difference.</p>
-            <Link href="/about" className="btn btn-line mt-8">
-              Our story <ArrowRight size={15} />
-            </Link>
+            {home.about.eyebrow ? <p className="eyebrow">{home.about.eyebrow}</p> : null}
+            <h2 className="heading-lg mt-4 text-ink">{home.about.title}</h2>
+            {home.about.text ? <p className="lead mt-4">{home.about.text}</p> : null}
+            {home.about.detail ? <p className="lead mt-4">{home.about.detail}</p> : null}
+            {home.about.quote ? <p className="mt-5 border-l-2 border-brand pl-4 text-base leading-7 text-brandDark">{home.about.quote}</p> : null}
+            {home.about.linkLabel ? (
+              <Link href="/about" className="btn btn-line mt-8">
+                {home.about.linkLabel} <ArrowRight size={15} />
+              </Link>
+            ) : null}
           </div>
         </div>
       </section>
+      ) : null}
 
+      {home.donation.visible ? (
       <section className="bg-brand text-white">
         <div className="shell flex flex-col items-start justify-between gap-6 py-12 sm:flex-row sm:items-center md:py-14">
           <div className="flex items-center gap-5">
-            <img src="/images/logo.svg" alt="" className="hidden h-20 w-auto rounded-xl bg-white object-contain p-1.5 sm:block" />
+            {home.donation.image ? <img src={home.donation.image} alt="" className="hidden h-20 w-auto object-contain sm:block" /> : null}
             <div>
               <h2 className="heading-lg text-white">{site.cta.title}</h2>
               <p className="mt-3 max-w-xl text-sm leading-7 text-white/90 sm:text-base">{site.cta.text}</p>
             </div>
           </div>
-          <Link href="/donate" className="btn btn-light shrink-0">
-            Donate Now <ArrowRight size={16} />
-          </Link>
+          {home.donation.buttonLabel ? (
+            <Link href="/donate" className="btn btn-light shrink-0">
+              {home.donation.buttonLabel} <ArrowRight size={16} />
+            </Link>
+          ) : null}
         </div>
       </section>
+      ) : null}
 
+      {home.news.visible ? (
       <section className="section shell">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="eyebrow">Latest updates</p>
-            <h2 className="heading-lg mt-3 text-ink">News & Updates</h2>
+            {home.news.eyebrow ? <p className="eyebrow">{home.news.eyebrow}</p> : null}
+            <h2 className="heading-lg mt-3 text-ink">{home.news.title}</h2>
           </div>
-          <Link href="/news" className="inline-flex items-center gap-1 text-sm text-brand hover:text-brandDark">View all <ArrowRight size={14} /></Link>
+          {home.news.linkLabel ? <Link href="/news" className="inline-flex items-center gap-1 text-sm text-brand hover:text-brandDark">{home.news.linkLabel} <ArrowRight size={14} /></Link> : null}
         </div>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {posts.map((post, index) => {
@@ -149,6 +147,7 @@ export default function HomePage() {
           })}
         </div>
       </section>
+      ) : null}
     </main>
   );
 }

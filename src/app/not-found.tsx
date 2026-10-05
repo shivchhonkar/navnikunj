@@ -3,8 +3,8 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { getSite } from '@/lib/store';
 
-export default function NotFound() {
-  const site = getSite();
+export default async function NotFound() {
+  const site = await getSite();
   return (
     <>
       <SiteHeader identity={site.identity} />

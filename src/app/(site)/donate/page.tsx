@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { DonateForm } from '@/components/DonateForm';
+import { PageBanner } from '@/components/PageBanner';
+import { bannerFor } from '@/lib/banners';
 import { getSite, razorpayReady } from '@/lib/store';
 
 export const metadata: Metadata = {
@@ -8,13 +10,14 @@ export const metadata: Metadata = {
   alternates: { canonical: '/donate' },
 };
 
-export default function DonatePage() {
-  const site = getSite();
+export default async function DonatePage() {
+  const site = await getSite();
   return (
-    <main className="mx-auto grid max-w-6xl items-start gap-8 px-4 py-12 md:py-16 lg:grid-cols-[1fr_0.9fr]">
+    <main>
+      <PageBanner banner={bannerFor(site.banners, 'donate')} />
+      <div className="section shell grid items-start gap-8 lg:grid-cols-[1fr_0.9fr]">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brand">Donate</p>
-        <h1 className="mt-2 text-4xl sm:text-5xl">{site.cta.title}</h1>
+        <h2 className="text-4xl sm:text-5xl">{site.cta.title}</h2>
         <p className="mt-4 max-w-xl leading-7 text-stone-700">{site.cta.text}</p>
         <ul className="mt-6 space-y-2 text-sm text-stone-600">
           <li>Payments open in Razorpay Checkout.</li>
@@ -23,6 +26,7 @@ export default function DonatePage() {
         </ul>
       </div>
       <DonateForm configured={razorpayReady()} />
+      </div>
     </main>
   );
 }

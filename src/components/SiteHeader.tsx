@@ -9,7 +9,7 @@ import type { SiteData } from '@/lib/types';
 const NAV = [
   { href: '/', label: 'Home' },
   { href: '/about', label: 'About Us' },
-  { href: '/work', label: 'Our Work' },
+  { href: '/team', label: 'Our Team' },
   { href: '/programs', label: 'Programs' },
   { href: '/gallery', label: 'Gallery' },
   { href: '/news', label: 'News & Updates' },
@@ -34,10 +34,10 @@ export function SiteHeader({ identity }: { identity: SiteData['identity'] }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const linkTone = scrolled ? 'hover:text-white/80' : 'text-ink hover:text-brand';
+  const linkTone = 'text-ink hover:text-brand';
 
   return (
-    <header className={`sticky top-0 z-40 border-b transition-colors duration-200 ${scrolled ? 'site-chrome border-white/10' : 'border-line bg-white text-ink'}`}>
+    <header className={`sticky top-0 z-40 border-b border-line bg-white text-ink transition-shadow duration-200 ${scrolled ? 'shadow-md' : ''}`}>
       <div className={`overflow-hidden border-b text-sm transition-all duration-200 ${scrolled ? 'h-0 border-transparent' : 'h-10 border-line'}`}>
         <div className="shell flex h-10 items-center justify-between gap-4">
         {/* <p className="flex min-w-0 items-center gap-2 truncate">
@@ -64,8 +64,8 @@ export function SiteHeader({ identity }: { identity: SiteData['identity'] }) {
         </div>
       </div>
       <div className="shell flex h-[4.5rem] items-center gap-8">
-        <Link href="/" className={`inline-flex shrink-0 items-center ${scrolled ? 'rounded-md bg-white px-2 py-1.5' : ''}`} aria-label={identity.name}>
-          <img src="/images/logo.svg" alt={identity.name} className={`w-auto object-contain ${scrolled ? 'h-9' : 'h-12'}`} />
+        <Link href="/" className="inline-flex shrink-0 items-center" aria-label={identity.name}>
+          <img src="/images/LOGO_NT.svg" alt={identity.name} className="h-12 w-auto object-contain" />
         </Link>
         <div className="ml-auto hidden items-center gap-10 lg:flex">
           <nav className="flex items-center gap-7 text-[15px]" aria-label="Primary">
@@ -82,15 +82,15 @@ export function SiteHeader({ identity }: { identity: SiteData['identity'] }) {
         </div>
         <div className="ml-auto flex items-center gap-2 lg:hidden">
           <Link href="/donate" className="btn btn-brand px-4 py-2.5 text-sm">Donate</Link>
-          <button type="button" className={`inline-flex rounded-md border p-2 ${scrolled ? 'border-white/30' : 'border-line text-ink'}`} aria-label="Open menu" onClick={() => setOpen((value) => !value)}>
+          <button type="button" className="inline-flex rounded-md border border-line p-2 text-ink" aria-label="Open menu" onClick={() => setOpen((value) => !value)}>
             {open ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </div>
       {open && (
-        <nav className={`space-y-1 border-t px-page py-3 lg:hidden ${scrolled ? 'border-white/10' : 'border-line'}`} aria-label="Mobile">
+        <nav className="space-y-1 border-t border-line px-page py-3 lg:hidden" aria-label="Mobile">
           {NAV.map((item) => (
-            <Link key={item.href} href={item.href} className={`block rounded-md px-2 py-2.5 text-sm ${scrolled ? 'text-white hover:bg-white/10' : 'text-ink hover:bg-sand'}`} onClick={() => setOpen(false)}>{item.label}</Link>
+            <Link key={item.href} href={item.href} className="block rounded-md px-2 py-2.5 text-sm text-ink hover:bg-sand" onClick={() => setOpen(false)}>{item.label}</Link>
           ))}
         </nav>
       )}

@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   const message = text(body.message);
   if (!name || !email || !phone || !message) return fail('Name, email, phone, and message are required');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail('Enter a valid email');
-  updateSite((site) => {
+  await updateSite((site) => {
     site.messages.unshift({
       id: `msg_${randomBytes(4).toString('hex')}`,
       name,

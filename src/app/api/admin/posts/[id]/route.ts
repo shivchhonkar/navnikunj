@@ -9,7 +9,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   if (!isAdmin()) return fail('Sign in required', 401);
   const body = await request.json().catch(() => ({}));
   let found = false;
-  updateSite((site) => {
+  await updateSite((site) => {
     const post = site.posts.find((item) => item.id === params.id);
     if (!post) return;
     found = true;
@@ -33,7 +33,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
 export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
   if (!isAdmin()) return fail('Sign in required', 401);
-  updateSite((site) => {
+  await updateSite((site) => {
     site.posts = site.posts.filter((item) => item.id !== params.id);
   });
   return json({ ok: true });

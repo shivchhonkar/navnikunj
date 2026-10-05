@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   });
   const order = await response.json().catch(() => ({}));
   if (!response.ok || !order.id) return fail(order.error?.description || 'Razorpay could not open an order', 502);
-  updateSite((site) => {
+  await updateSite((site) => {
     site.donations.unshift({
       id: receipt,
       name,
