@@ -17,3 +17,39 @@ body {
 * {
   scrollbar-width: thin;
 }
+
+.story p + p,
+.story ul,
+.story ol {
+  margin-top: 0.75rem;
+}
+
+.story ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+
+.story ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+}
+
+.story strong {
+  font-weight: 700;
+}
+
+.story em {
+  font-style: italic;
+}
+
+.story u {
+  text-decoration: underline;
+}
+
+.story-editor .ProseMirror {
+  min-height: 10rem;
+}
+
+.story-editor .ProseMirror:focus {
+  outline: none;
+}

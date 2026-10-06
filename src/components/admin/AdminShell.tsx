@@ -89,7 +89,7 @@ function NavLinks({ pathname, collapsed, onNavigate, links }: { pathname: string
       {links.map((item) => {
         const Icon = item.icon;
         const active = pathname === item.href;
-        const sections = item.href === '/admin/content' ? CONTENT_SECTIONS : item.href === '/admin/posts' ? POST_SECTIONS : null;
+        const sections = item.href === '/admin/content' ? CONTENT_SECTIONS : null;
         const sectionOpen = item.href === '/admin/content' ? contentOpen : postsOpen;
         const inSection = item.href === '/admin/content' ? inContent : inPosts;
         const toggle = item.href === '/admin/content' ? () => setContentOpen((value) => !value) : () => setPostsOpen((value) => !value);

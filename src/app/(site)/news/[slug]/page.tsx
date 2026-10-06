@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { MapPin } from 'lucide-react';
+import { CalendarDays, MapPin } from 'lucide-react';
 import { PostCard, formatPostDate, postPhoto } from '@/components/PostCard';
 import { ShareLinks } from '@/components/ShareLinks';
+import { storyHtml } from '@/lib/story';
 import { getSite, siteUrl } from '@/lib/store';
 import type { Post } from '@/lib/types';
 
@@ -106,48 +107,49 @@ export default async function NewsArticle({ params }: Params) {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
-      <section className="relative isolate overflow-hidden text-white">
+      <section className="relative isolate overflow-hidden">
         <img src={image} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink/20 via-ink/50 to-ink/78" />
-        <div className="shell relative flex min-h-[14rem] items-end py-12 md:min-h-[18rem] md:items-center md:justify-end">
-          <div className="max-w-xl md:text-right">
-            <p className="text-sm uppercase tracking-[0.18em] text-white/80">{KIND_LABEL[post.kind]}</p>
-            <h1 className="heading-xl mt-3">{post.title}</h1>
-            <p className="mt-3 text-sm text-white/90 sm:text-base">
-              <time dateTime={post.date}>{formatPostDate(post.date)}</time>
-              {post.location ? ` · ${post.location}` : ''}
+        <img src={image} alt="" className="hero-blur absolute inset-0 h-full w-full object-cover" />
+        <div className="hero-wash absolute inset-0" />
+        <div className="shell relative flex min-h-[15rem] items-center py-10 md:min-h-[18rem]">
+          <div className="max-w-2xl">
+            <p className="eyebrow">{KIND_LABEL[post.kind]}</p>
+            <h1 className="heading-xl mt-3 max-w-xl text-ink">{post.title}</h1>
+            <p className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-ink/80">
+              <time dateTime={post.date} className="inline-flex items-center gap-1.5">
+                <CalendarDays size={15} className="text-brand" />
+                {formatPostDate(post.date)}
+              </time>
+              {post.location ? <span className="inline-flex items-center gap-1.5"><MapPin size={15} className="text-brand" />{post.location}</span> : null}
             </p>
           </div>
         </div>
       </section>
 
-      <article className="section shell max-w-3xl">
-        <nav aria-label="Breadcrumb" className="text-sm text-muted">
-          <Link href="/" className="hover:text-brand">Home</Link>
-          <span aria-hidden> / </span>
-          <Link href="/news" className="hover:text-brand">News & Updates</Link>
-          <span aria-hidden> / </span>
-          <span className="text-ink">{post.title}</span>
-        </nav>
-
-        <p className="lead mt-8 text-lg">{post.excerpt}</p>
-        {post.location ? (
-          <p className="mt-4 inline-flex items-center gap-2 text-sm text-ink">
-            <MapPin size={15} className="text-brand" /> {post.location}
-          </p>
-        ) : null}
-        <div className="mt-8 whitespace-pre-wrap text-base leading-8 text-ink">{post.body}</div>
-
-        <div className="mt-10 border-t border-line pt-8">
-          <ShareLinks url={pageUrl} title={post.title} text={post.excerpt} />
+      <article className="section shell">
+        <div className="mx-auto max-w-3xl">
+          <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-muted">
+            <Link href="/" className="hover:text-brand">Home</Link>
+            <span aria-hidden>/</span>
+            <Link href="/news" className="hover:text-brand">News & Updates</Link>
+            <span aria-hidden>/</span>
+            <span className="text-ink">{post.title}</span>
+          </nav>
+          {post.excerpt ? <p className="lead mt-8 text-lg">{post.excerpt}</p> : null}
+          <div className="story mt-8 text-base leading-8 text-ink" dangerouslySetInnerHTML={{ __html: storyHtml(post.body) }} />
+          <div className="mt-10 rounded-card border border-line bg-paper px-5 py-5">
+            <ShareLinks url={pageUrl} title={post.title} text={post.excerpt} />
+          </div>
         </div>
       </article>
 
       {related.length ? (
-        <section className="section shell border-t border-line pt-0">
-          <h2 className="heading-lg text-ink">More updates</h2>
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
-            {related.map((item) => <PostCard key={item.id} post={item} />)}
+        <section className="section border-t border-line bg-paper">
+          <div className="shell">
+            <h2 className="heading-lg text-ink">More updates</h2>
+            <div className="mt-8 grid gap-5 md:grid-cols-3">
+              {related.map((item) => <PostCard key={item.id} post={item} />)}
+            </div>
           </div>
         </section>
       ) : null}

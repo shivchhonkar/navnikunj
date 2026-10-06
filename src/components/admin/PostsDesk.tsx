@@ -4,9 +4,24 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import { useDeskNotice } from '@/components/admin/AdminNotice';
+import { StoryEditor } from '@/components/admin/StoryEditor';
 import type { Post, PostKind } from '@/lib/types';
 
 const field = 'mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm disabled:bg-stone-100';
+
+const KIND_OPTIONS: { value: PostKind; label: string; noun: string }[] = [
+  { value: 'news', label: 'News', noun: 'news post' },
+  { value: 'blog', label: 'Blog', noun: 'blog post' },
+  { value: 'event', label: 'Event', noun: 'event' },
+];
+
+function nounFor(kind: PostKind) {
+  return KIND_OPTIONS.find((item) => item.value === kind)?.noun || 'post';
+}
+
+function labelFor(kind: PostKind) {
+  return KIND_OPTIONS.find((item) => item.value === kind)?.label || 'Post';
+}
 
 type Draft = {
   kind: PostKind;
@@ -47,10 +62,12 @@ async function upload(file: File) {
   return data.url as string;
 }
 
-export function PostsDesk({ posts, kind, noun, title, modal = false, pageSize = 0 }: { posts: Post[]; kind: PostKind; noun: string; title?: string; modal?: boolean; pageSize?: number }) {
+export function PostsDesk({ posts, initialKind = 'all', modal = false, pageSize = 0 }: { posts: Post[]; initialKind?: PostKind | 'all'; modal?: boolean; pageSize?: number }) {
   const router = useRouter();
   const busy = useRef(false);
-  const [form, setForm] = useState<Draft>(blank(kind));
+  const [filter, setFilter] = useState<PostKind | 'all'>(initialKind);
+  const defaultKind: PostKind = filter === 'all' ? 'news' : filter;
+  const [form, setForm] = useState<Draft>(blank(defaultKind));
   const [editing, setEditing] = useState('');
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -58,7 +75,14 @@ export function PostsDesk({ posts, kind, noun, title, modal = false, pageSize = 
   const [imageKey, setImageKey] = useState(0);
   const [page, setPage] = useState(1);
   const { show, clear } = useDeskNotice();
-  const list = posts.filter((post) => post.kind === kind);
+  const counts = {
+    all: posts.length,
+    news: posts.filter((post) => post.kind === 'news').length,
+    blog: posts.filter((post) => post.kind === 'blog').length,
+    event: posts.filter((post) => post.kind === 'event').length,
+  };
+  const list = filter === 'all' ? posts : posts.filter((post) => post.kind === filter);
+  const noun = nounFor(form.kind);
   const pages = pageSize > 0 ? Math.max(1, Math.ceil(list.length / pageSize)) : 1;
   const safePage = Math.min(page, pages);
   const visible = pageSize > 0 ? list.slice((safePage - 1) * pageSize, safePage * pageSize) : list;
@@ -68,7 +92,7 @@ export function PostsDesk({ posts, kind, noun, title, modal = false, pageSize = 
     if (busy.current) return;
     setOpen(false);
     setEditing('');
-    setForm(blank(kind));
+    setForm(blank(defaultKind));
     setImageKey((key) => key + 1);
   };
 
@@ -96,7 +120,7 @@ export function PostsDesk({ posts, kind, noun, title, modal = false, pageSize = 
       const response = await fetch(editing ? `/api/admin/posts/${editing}` : '/api/admin/posts', {
         method: editing ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, kind }),
+        body: JSON.stringify(form),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
@@ -104,7 +128,7 @@ export function PostsDesk({ posts, kind, noun, title, modal = false, pageSize = 
         return;
       }
       const savedExisting = Boolean(editing);
-      setForm(blank(kind));
+      setForm(blank(defaultKind));
       setEditing('');
       setImageKey((key) => key + 1);
       setOpen(false);
@@ -163,13 +187,21 @@ export function PostsDesk({ posts, kind, noun, title, modal = false, pageSize = 
     <form onSubmit={submit} className={modal ? '' : 'rounded-2xl bg-white p-5 shadow-sm'} aria-busy={pending}>
       <fieldset disabled={pending} className="min-w-0 space-y-3 border-0 p-0">
         {!modal ? <h2 className="text-2xl">{editing ? `Edit ${noun}` : `New ${noun}`}</h2> : null}
+        <label className="block text-sm font-medium">Type
+          <select className={field} value={form.kind} onChange={(event) => setForm({ ...form, kind: event.target.value as PostKind })}>
+            {KIND_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+          </select>
+        </label>
         <label className="block text-sm font-medium">Title<input required className={field} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} /></label>
         <label className="block text-sm font-medium">Date<input type="date" className={field} value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} /></label>
         <label className="block text-sm font-medium">Location<input className={field} value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} /></label>
         <label className="block text-sm font-medium">Summary<textarea className={field} rows={2} value={form.excerpt} onChange={(event) => setForm({ ...form, excerpt: event.target.value })} /></label>
-        <label className="block text-sm font-medium">Story<textarea className={field} rows={6} value={form.body} onChange={(event) => setForm({ ...form, body: event.target.value })} /></label>
+        <div className="block text-sm font-medium">Story
+          <StoryEditor value={form.body} disabled={pending} onChange={(body) => setForm((current) => ({ ...current, body }))} />
+        </div>
         <label className="block text-sm font-medium">Image
           <input key={imageKey} type="file" accept="image/*" className="mt-1 block text-sm disabled:cursor-not-allowed" onChange={(event) => onImage(event.target.files?.[0])} />
+          <span className="mt-1 block text-xs font-normal text-stone-500">Use a landscape photo, 1600 × 900 px. It fills the article banner and the news cards.</span>
         </label>
         {form.image ? <img src={form.image} alt="" className="h-24 rounded-lg object-cover" /> : null}
         <div className="space-y-3 rounded-xl border border-stone-200 p-3">
@@ -197,7 +229,7 @@ export function PostsDesk({ posts, kind, noun, title, modal = false, pageSize = 
               {post.image ? <img src={post.image} alt="" className="h-full w-full object-cover" /> : null}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs uppercase tracking-wide text-brand">{post.published ? 'Published' : 'Hidden'}</p>
+              <p className="text-xs uppercase tracking-wide text-brand">{labelFor(post.kind)} · {post.published ? 'Published' : 'Hidden'}</p>
               <h3 className="mt-1 text-xl">{post.title}</h3>
               <p className="text-sm text-stone-500">{post.date}{post.location ? ` · ${post.location}` : ''}</p>
               {post.keywords ? <p className="mt-1 truncate text-xs text-stone-400">{post.keywords}</p> : null}
@@ -208,7 +240,7 @@ export function PostsDesk({ posts, kind, noun, title, modal = false, pageSize = 
             </div>
           </li>
         ))}
-        {!list.length && <li className="rounded-2xl bg-white px-4 py-10 text-center text-sm text-stone-500">Nothing here yet.</li>}
+        {!list.length && <li className="rounded-2xl bg-white px-4 py-10 text-center text-sm text-stone-500">{filter === 'all' ? 'No posts yet.' : `No ${labelFor(filter).toLowerCase()} yet.`}</li>}
       </ul>
       {pageSize > 0 && list.length > 0 ? (
         <div className="mt-4 flex items-center justify-between gap-3 text-sm">
@@ -226,9 +258,25 @@ export function PostsDesk({ posts, kind, noun, title, modal = false, pageSize = 
   return (
     <div>
       {modal ? (
-        <div className="mb-4 flex items-center justify-between gap-3">
-          {title ? <h1 className="text-3xl">{title}</h1> : <span />}
-          <button type="button" onClick={() => { setEditing(''); setForm(blank(kind)); setImageKey((key) => key + 1); setOpen(true); }} className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white">Add</button>
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-3xl">News & events</h1>
+            <p className="mt-1 text-sm text-stone-600">News, blogs, and events in one list.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <label className="text-sm font-medium text-stone-700">
+              <span className="sr-only">Show</span>
+              <select
+                className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm"
+                value={filter}
+                onChange={(event) => { setFilter(event.target.value as PostKind | 'all'); setPage(1); }}
+              >
+                <option value="all">All ({counts.all})</option>
+                {KIND_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label} ({counts[option.value]})</option>)}
+              </select>
+            </label>
+            <button type="button" onClick={() => { setEditing(''); setForm(blank(defaultKind)); setImageKey((key) => key + 1); setOpen(true); }} className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white">Add</button>
+          </div>
         </div>
       ) : null}
       <div className={modal ? '' : 'grid gap-6 lg:grid-cols-[0.9fr_1.1fr]'}>

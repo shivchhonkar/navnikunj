@@ -9,9 +9,7 @@ export default async function AdminHome() {
     { href: '/admin/donations', label: 'Paid donations', value: paid.length },
     { href: '/admin/donors', label: 'Donors', value: paid.length },
     { href: '/admin/volunteers', label: 'Volunteers', value: site.volunteers.length },
-    { href: '/admin/posts/events', label: 'Events', value: site.posts.filter((item) => item.kind === 'event').length },
-    { href: '/admin/posts/news', label: 'News', value: site.posts.filter((item) => item.kind === 'news').length },
-    { href: '/admin/posts/blog', label: 'Blogs', value: site.posts.filter((item) => item.kind === 'blog').length },
+    { href: '/admin/posts', label: 'News & events', value: site.posts.length },
     { href: '/admin/images', label: 'Images', value: site.images.length },
     { href: '/admin/users', label: 'Users', value: site.users.length },
   ].filter((card) => card.href !== '/admin/users' || user?.role === 'admin');
