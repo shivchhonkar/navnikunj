@@ -49,8 +49,9 @@ const CHAIRMAN = {
   image: '/images/team/sam.jpeg',
 };
 
-function Letter({ message, imageSide = 'right' }: { message: typeof CEO; imageSide?: 'left' | 'right' }) {
+function Letter({ message, imageSide = 'right', tall = false }: { message: typeof CEO; imageSide?: 'left' | 'right'; tall?: boolean }) {
   const imageOnLeft = imageSide === 'left';
+  const frame = tall ? 'h-[28rem] object-top lg:h-[42rem]' : 'h-80 object-center lg:h-[32rem]';
   return (
     <article className={`grid items-start gap-10 lg:gap-14 ${imageOnLeft ? 'lg:grid-cols-[0.95fr_1.05fr]' : 'lg:grid-cols-[1.05fr_0.95fr]'}`}>
       <div className={imageOnLeft ? 'lg:order-2' : undefined}>
@@ -70,7 +71,7 @@ function Letter({ message, imageSide = 'right' }: { message: typeof CEO; imageSi
         </blockquote>
       </div>
       {message.image ? (
-        <img src={message.image} alt={message.name} className={`h-80 w-full rounded-card object-cover shadow-card lg:sticky lg:top-28 lg:h-[32rem] ${imageOnLeft ? 'lg:order-1' : ''}`} />
+        <img src={message.image} alt={message.name} className={`${frame} w-full rounded-card object-cover shadow-card lg:sticky lg:top-28 ${imageOnLeft ? 'lg:order-1' : ''}`} />
       ) : (
         <div className={`flex h-80 w-full flex-col items-center justify-center gap-3 rounded-card bg-sand text-muted shadow-card lg:sticky lg:top-28 lg:h-[32rem] ${imageOnLeft ? 'lg:order-1' : ''}`} role="img" aria-label={`Photo of ${message.name}`}>
           <ImageIcon size={28} strokeWidth={1.5} aria-hidden />
@@ -93,7 +94,7 @@ export default async function TeamPage() {
       </section>
       <section className="section bg-cream">
         <div className="shell">
-          <Letter message={CEO} />
+          <Letter message={CEO} tall />
         </div>
       </section>
     </main>
