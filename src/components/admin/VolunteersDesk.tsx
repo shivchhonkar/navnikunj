@@ -1,23 +1,54 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { X } from 'lucide-react';
 import { useDeskNotice } from '@/components/admin/AdminNotice';
 import type { Volunteer, VolunteerStatus } from '@/lib/types';
 
 const field = 'mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm disabled:bg-stone-100';
 
+const STATUS: { value: VolunteerStatus; label: string }[] = [
+  { value: 'applied', label: 'Applied' },
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+];
+
 export function VolunteersDesk({ volunteers }: { volunteers: Volunteer[] }) {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
+  const busy = useRef(false);
   const { show, clear } = useDeskNotice();
   const [rows, setRows] = useState(volunteers);
   const [pending, setPending] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [removingId, setRemovingId] = useState('');
+
+  const close = () => {
+    if (pending) return;
+    setOpen(false);
+  };
+
+  useEffect(() => {
+    setRows(volunteers);
+  }, [volunteers]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') close();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, pending]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (pending) return;
-    const form = event.currentTarget;
+    if (busy.current) return;
+    const form = formRef.current;
+    if (!form) return;
     const data = new FormData(form);
+    busy.current = true;
     setPending(true);
     clear();
     try {
@@ -40,18 +71,21 @@ export function VolunteersDesk({ volunteers }: { volunteers: Volunteer[] }) {
         show('error', saved.error || 'The volunteer could not be saved.');
         return;
       }
-      setRows((current) => [saved.volunteer as Volunteer, ...current]);
+      setRows((current) => [saved.volunteer as Volunteer, ...current.filter((item) => item.id !== saved.volunteer.id)]);
       form.reset();
+      setOpen(false);
       show('success', 'Volunteer added.');
       router.refresh();
     } catch {
       show('error', 'The volunteer could not be saved. Try again.');
     } finally {
+      busy.current = false;
       setPending(false);
     }
   };
 
   const setStatus = async (row: Volunteer, status: VolunteerStatus) => {
+    if (busy.current) return;
     clear();
     const response = await fetch('/api/admin/volunteers', {
       method: 'PATCH',
@@ -68,81 +102,131 @@ export function VolunteersDesk({ volunteers }: { volunteers: Volunteer[] }) {
   };
 
   const remove = async (id: string) => {
+    if (busy.current) return;
+    busy.current = true;
+    setRemovingId(id);
     clear();
-    const response = await fetch('/api/admin/volunteers', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
-    const saved = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      show('error', saved.error || 'The volunteer could not be removed.');
-      return;
+    try {
+      const response = await fetch('/api/admin/volunteers', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      const saved = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        show('error', saved.error || 'The volunteer could not be removed.');
+        return;
+      }
+      setRows((current) => current.filter((item) => item.id !== id));
+      show('success', 'Volunteer removed.');
+      router.refresh();
+    } catch {
+      show('error', 'The volunteer could not be removed. Try again.');
+    } finally {
+      busy.current = false;
+      setRemovingId('');
     }
-    setRows((current) => current.filter((item) => item.id !== id));
-    show('success', 'Volunteer removed.');
-    router.refresh();
   };
 
   return (
     <div>
-      <form onSubmit={submit} className="rounded-2xl bg-white p-5 shadow-sm" aria-busy={pending}>
-        <fieldset disabled={pending} className="grid gap-3 border-0 p-0 md:grid-cols-2">
-          <label className="text-sm font-medium">Name
-            <input name="name" required className={field} />
-          </label>
-          <label className="text-sm font-medium">Phone
-            <input name="phone" required className={field} />
-          </label>
-          <label className="text-sm font-medium">Email
-            <input name="email" type="email" className={field} />
-          </label>
-          <label className="text-sm font-medium">City
-            <input name="city" className={field} />
-          </label>
-          <label className="text-sm font-medium">Skills
-            <input name="skills" className={field} placeholder="Teaching, health camp, driving" />
-          </label>
-          <label className="text-sm font-medium">Availability
-            <input name="availability" className={field} placeholder="Weekends" />
-          </label>
-          <label className="text-sm font-medium">Status
-            <select name="status" className={field} defaultValue="applied">
-              <option value="applied">Applied</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </label>
-          <label className="text-sm font-medium md:col-span-2">Notes
-            <textarea name="notes" rows={3} className={field} />
-          </label>
-          <button disabled={pending} className="w-fit rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{pending ? 'Saving…' : 'Add volunteer'}</button>
-        </fieldset>
-      </form>
-      <ul className="mt-6 space-y-3">
-        {rows.map((row) => (
-          <li key={row.id} className="rounded-2xl bg-white p-4 shadow-sm">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="font-semibold">{row.name}</p>
-                <p className="text-sm text-stone-500">{[row.phone, row.email, row.city].filter(Boolean).join(' · ')}</p>
-                {row.skills ? <p className="mt-2 text-sm text-stone-700">Skills: {row.skills}</p> : null}
-                {row.availability ? <p className="text-sm text-stone-700">Available: {row.availability}</p> : null}
-                {row.notes ? <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-stone-600">{row.notes}</p> : null}
-              </div>
-              <div className="flex items-center gap-3">
-                <select aria-label={`Status for ${row.name}`} value={row.status} onChange={(event) => setStatus(row, event.target.value as VolunteerStatus)} className="rounded-lg border border-stone-300 px-2 py-1.5 text-sm">
-                  <option value="applied">Applied</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-                <button type="button" onClick={() => remove(row.id)} className="text-sm text-red-700">Remove</button>
-              </div>
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl">Volunteers</h1>
+          <p className="mt-2 text-sm text-stone-600">People who have offered time, and whether they are active.</p>
+        </div>
+        <button type="button" onClick={() => setOpen(true)} className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white">Add volunteers</button>
+      </div>
+
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
+        <table className="min-w-full text-left text-sm">
+          <thead className="bg-sand text-xs uppercase tracking-wide text-stone-500">
+            <tr>
+              <th className="px-3 py-2">Name</th>
+              <th className="px-3 py-2">Phone</th>
+              <th className="px-3 py-2">Email</th>
+              <th className="px-3 py-2">City</th>
+              <th className="px-3 py-2">Skills</th>
+              <th className="px-3 py-2">Availability</th>
+              <th className="px-3 py-2">Status</th>
+              <th className="px-3 py-2" />
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.id} className="border-t border-stone-100 align-top">
+                <td className="px-3 py-3 font-medium">
+                  {row.name}
+                  {row.notes ? <p className="mt-1 max-w-xs whitespace-pre-wrap text-xs font-normal leading-5 text-stone-500">{row.notes}</p> : null}
+                </td>
+                <td className="px-3 py-3 whitespace-nowrap">{row.phone}</td>
+                <td className="px-3 py-3">{row.email || '—'}</td>
+                <td className="px-3 py-3 whitespace-nowrap">{row.city || '—'}</td>
+                <td className="px-3 py-3">{row.skills || '—'}</td>
+                <td className="px-3 py-3 whitespace-nowrap">{row.availability || '—'}</td>
+                <td className="px-3 py-3">
+                  <select aria-label={`Status for ${row.name}`} value={row.status} onChange={(event) => setStatus(row, event.target.value as VolunteerStatus)} className="rounded-lg border border-stone-300 px-2 py-1.5 text-sm">
+                    {STATUS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                  </select>
+                </td>
+                <td className="px-3 py-3">
+                  <button type="button" disabled={Boolean(removingId)} className="text-sm text-red-700 disabled:cursor-not-allowed disabled:opacity-50" onClick={() => remove(row.id)}>
+                    {removingId === row.id ? 'Removing…' : 'Remove'}
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {!rows.length && <tr><td className="px-3 py-6 text-stone-500" colSpan={8}>No volunteers yet.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+
+      {open ? (
+        <div className="fixed bottom-0 right-0 top-16 z-20 left-0 overflow-y-auto bg-white transition-[left] duration-200 lg:left-[var(--admin-side)]" onClick={close}>
+          <div role="dialog" aria-modal="true" aria-labelledby="add-volunteer-title" className="min-h-full w-full bg-white px-6 py-6 lg:px-8" onClick={(event) => event.stopPropagation()}>
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 id="add-volunteer-title" className="text-2xl">Add volunteers</h2>
+              <button type="button" onClick={close} className="rounded-md p-2 text-stone-500 hover:bg-stone-100" aria-label="Close">
+                <X size={18} />
+              </button>
             </div>
-          </li>
-        ))}
-        {!rows.length ? <li className="text-sm text-stone-500">No volunteers yet.</li> : null}
-      </ul>
+            <form ref={formRef} onSubmit={submit} aria-busy={pending}>
+              <fieldset disabled={pending} className="grid min-w-0 gap-3 border-0 p-0 md:grid-cols-2">
+                <label className="text-sm font-medium">Name
+                  <input name="name" required className={field} />
+                </label>
+                <label className="text-sm font-medium">Phone
+                  <input name="phone" required className={field} />
+                </label>
+                <label className="text-sm font-medium">Email
+                  <input name="email" type="email" className={field} />
+                </label>
+                <label className="text-sm font-medium">City
+                  <input name="city" className={field} />
+                </label>
+                <label className="text-sm font-medium">Skills
+                  <input name="skills" className={field} placeholder="Teaching, health camp, driving" />
+                </label>
+                <label className="text-sm font-medium">Availability
+                  <input name="availability" className={field} placeholder="Weekends" />
+                </label>
+                <label className="text-sm font-medium">Status
+                  <select name="status" className={field} defaultValue="applied">
+                    {STATUS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                  </select>
+                </label>
+                <label className="text-sm font-medium md:col-span-2">Notes
+                  <textarea name="notes" rows={3} className={field} />
+                </label>
+                <div className="flex items-end justify-end gap-3 md:col-span-2">
+                  <button type="button" onClick={close} className="text-sm text-stone-600">Cancel</button>
+                  <button disabled={pending} className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">{pending ? 'Saving…' : 'Save volunteer'}</button>
+                </div>
+              </fieldset>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

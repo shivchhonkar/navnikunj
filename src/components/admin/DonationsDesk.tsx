@@ -23,23 +23,20 @@ export function DonationsDesk({ donations }: { donations: Donation[] }) {
 
   return (
     <div>
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Transaction status">
-        {FILTERS.map((item) => {
-          const active = filter === item.id;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => setFilter(item.id)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold ${active ? 'bg-brand text-white' : 'bg-white text-stone-700 shadow-sm hover:bg-sand'}`}
-            >
-              {item.label}
-              <span className={`ml-2 ${active ? 'text-white/80' : 'text-stone-400'}`}>{counts[item.id]}</span>
-            </button>
-          );
-        })}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl">Donations</h1>
+        <label className="flex items-center gap-2 text-sm font-medium text-stone-700">
+          Status
+          <select
+            className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-normal"
+            value={filter}
+            onChange={(event) => setFilter(event.target.value as FilterId)}
+          >
+            {FILTERS.map((item) => (
+              <option key={item.id} value={item.id}>{item.label} ({counts[item.id]})</option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <div className="mt-4 overflow-x-auto rounded-2xl bg-white shadow-sm">

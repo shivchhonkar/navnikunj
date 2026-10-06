@@ -7,10 +7,24 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   display_name TEXT NOT NULL DEFAULT '',
   email TEXT NOT NULL DEFAULT '',
-  role TEXT NOT NULL DEFAULT 'admin' CHECK (role IN ('admin', 'editor')),
+  role TEXT NOT NULL DEFAULT 'admin' CHECK (role IN ('superAdmin', 'admin', 'editor')),
   active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+DO $$
+DECLARE constraint_name text;
+BEGIN
+  SELECT con.conname INTO constraint_name
+  FROM pg_constraint con
+  JOIN pg_class rel ON rel.oid = con.conrelid
+  WHERE rel.relname = 'users' AND con.contype = 'c' AND pg_get_constraintdef(con.oid) ILIKE '%role%';
+  IF constraint_name IS NOT NULL AND constraint_name <> 'users_role_check' THEN
+    EXECUTE format('ALTER TABLE users DROP CONSTRAINT %I', constraint_name);
+  END IF;
+END $$;
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;
+ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('superAdmin', 'admin', 'editor'));
 
 CREATE TABLE IF NOT EXISTS pages (
   slug TEXT PRIMARY KEY,
@@ -141,7 +155,7 @@ CREATE TABLE IF NOT EXISTS reports (
 );
 `;
 
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 const globalDb = globalThis as unknown as { navnikunjPool?: Pool; navnikunjReady?: Promise<void> | null; navnikunjSchema?: number };
 
 function connectionConfig() {

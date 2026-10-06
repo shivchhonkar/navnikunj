@@ -73,7 +73,16 @@ export type Donation = {
 };
 
 export type VolunteerStatus = 'applied' | 'active' | 'inactive';
-export type UserRole = 'admin' | 'editor';
+export type UserRole = 'superAdmin' | 'admin' | 'editor';
+
+export function asUserRole(value: string): UserRole {
+  if (value === 'superAdmin' || value === 'editor') return value;
+  return 'admin';
+}
+
+export function managesUsers(role: UserRole) {
+  return role === 'superAdmin' || role === 'admin';
+}
 export type ReportKind = 'overview' | 'donations' | 'donors' | 'volunteers' | 'events';
 export type ReportStatus = 'draft' | 'published';
 

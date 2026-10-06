@@ -117,15 +117,19 @@ export function UsersDesk({ users, currentId }: { users: AppUser[]; currentId: s
               <p className="text-sm text-stone-500">{row.username}{row.email ? ` · ${row.email}` : ''}</p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <select aria-label={`Role for ${row.username}`} value={row.role} onChange={(event) => save(row, { role: event.target.value as UserRole })} className="rounded-lg border border-stone-300 px-2 py-1.5 text-sm">
-                <option value="admin">Administrator</option>
-                <option value="editor">Editor</option>
-              </select>
+              {row.role === 'superAdmin' ? (
+                <span className="text-sm font-medium text-stone-700">Super administrator</span>
+              ) : (
+                <select aria-label={`Role for ${row.username}`} value={row.role} onChange={(event) => save(row, { role: event.target.value as UserRole })} className="rounded-lg border border-stone-300 px-2 py-1.5 text-sm">
+                  <option value="admin">Administrator</option>
+                  <option value="editor">Editor</option>
+                </select>
+              )}
               <label className="flex items-center gap-2 text-sm text-stone-700">
-                <input type="checkbox" checked={row.active} onChange={(event) => save(row, { active: event.target.checked })} />
+                <input type="checkbox" checked={row.active} disabled={row.role === 'superAdmin'} onChange={(event) => save(row, { active: event.target.checked })} />
                 Active
               </label>
-              {row.id !== currentId ? <button type="button" onClick={() => remove(row.id)} className="text-sm text-red-700">Remove</button> : null}
+              {row.id !== currentId && row.role !== 'superAdmin' ? <button type="button" onClick={() => remove(row.id)} className="text-sm text-red-700">Remove</button> : null}
             </div>
           </li>
         ))}

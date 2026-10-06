@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto';
 import { query } from './db';
 import { hashPassword } from './password';
-import type { AuthUser, Report, ReportKind, UserRole, Volunteer, VolunteerStatus } from './types';
+import { asUserRole, type AuthUser, type Report, type ReportKind, type UserRole, type Volunteer, type VolunteerStatus } from './types';
 
 type UserRow = {
   id: string;
@@ -20,7 +20,7 @@ function authUser(row: UserRow): AuthUser {
     username: row.username,
     displayName: row.display_name,
     email: row.email,
-    role: row.role === 'editor' ? 'editor' : 'admin',
+    role: asUserRole(row.role),
     active: row.active,
     at: row.created_at.toISOString(),
     passwordHash: row.password_hash,
@@ -41,6 +41,7 @@ export async function findUserById(id: string) {
 }
 
 export async function createUser(input: { username: string; password: string; displayName: string; email: string; role: UserRole }) {
+  if (input.role === 'superAdmin') throw new Error('Use the super admin script to create this account.');
   const username = input.username.trim().toLowerCase();
   if (!/^[a-z0-9._-]{3,40}$/.test(username)) throw new Error('Username must be 3–40 letters, numbers, dots, or dashes.');
   if (input.password.length < 8) throw new Error('Password must be at least 8 characters.');
@@ -59,7 +60,7 @@ export async function createUser(input: { username: string; password: string; di
 }
 
 async function activeAdmins() {
-  const result = await query<{ n: number }>(`SELECT COUNT(*)::int AS n FROM users WHERE role = 'admin' AND active = TRUE`);
+  const result = await query<{ n: number }>(`SELECT COUNT(*)::int AS n FROM users WHERE role IN ('admin', 'superAdmin') AND active = TRUE`);
   return result.rows[0]?.n || 0;
 }
 
@@ -67,9 +68,13 @@ export async function updateUser(id: string, actorId: string, input: { displayNa
   const current = await query<UserRow>(`${USER_SQL} WHERE id = $1`, [id]);
   const row = current.rows[0];
   if (!row) throw new Error('User not found.');
-  const nextRole = input.role || (row.role === 'editor' ? 'editor' : 'admin');
+  const stored = asUserRole(row.role);
+  if (stored === 'superAdmin' && ((input.role && input.role !== 'superAdmin') || input.active === false)) {
+    throw new Error('Use the super admin script to change this account.');
+  }
+  const nextRole = stored === 'superAdmin' ? 'superAdmin' : (input.role || stored);
   const nextActive = input.active ?? row.active;
-  const removesAdmin = row.role === 'admin' && row.active && (nextRole !== 'admin' || !nextActive);
+  const removesAdmin = stored !== 'editor' && row.active && (nextRole === 'editor' || !nextActive);
   if (removesAdmin && await activeAdmins() < 2) throw new Error('Keep at least one active administrator.');
   if (id === actorId && !nextActive) throw new Error('You cannot deactivate the account you are using.');
   if (input.password && input.password.length < 8) throw new Error('Password must be at least 8 characters.');
@@ -85,6 +90,7 @@ export async function deleteUser(id: string, actorId: string) {
   const current = await query<UserRow>(`${USER_SQL} WHERE id = $1`, [id]);
   const row = current.rows[0];
   if (!row) throw new Error('User not found.');
+  if (asUserRole(row.role) === 'superAdmin') throw new Error('Use the super admin script to change this account.');
   if (row.role === 'admin' && row.active && await activeAdmins() < 2) throw new Error('Keep at least one active administrator.');
   await query(`DELETE FROM users WHERE id = $1`, [id]);
 }

@@ -8,7 +8,8 @@
     "start": "next start -p 7200",
     "pm2:start": "pm2 start ecosystem.config.js",
     "pm2:reload": "pm2 reload navnikunj",
-    "pm2:stop": "pm2 stop navnikunj"
+    "pm2:stop": "pm2 stop navnikunj",
+    "super-admin": "tsx src/scripts/super-admin.ts"
   },
   "dependencies": {
     "@tiptap/extension-text-align": "^2.27.3",
@@ -30,6 +31,7 @@
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
+    "tsx": "^4.23.15",
     "typescript": "^5.6.3"
   }
 }

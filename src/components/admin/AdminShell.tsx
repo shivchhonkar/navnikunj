@@ -170,7 +170,7 @@ export function AdminShell({ user, role = 'admin', children }: { user: string; r
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  const links = role === 'admin' ? LINKS : LINKS.filter((item) => item.href !== '/admin/users');
+  const links = role === 'admin' || role === 'superAdmin' ? LINKS : LINKS.filter((item) => item.href !== '/admin/users');
   const searchItems = useMemo(() => [
     ...links.map((item) => ({ href: item.href, label: item.label, group: 'Desk' })),
     ...CONTENT_SECTIONS.map((section) => ({ href: section.href, label: section.label, group: 'Content' })),
@@ -211,7 +211,7 @@ export function AdminShell({ user, role = 'admin', children }: { user: string; r
 
   const brand = (
     <Link href="/admin" className="flex items-center gap-2.5" onClick={() => setOpen(false)}>
-      <img src="/images/logo.svg" alt="" className="h-9 w-auto rounded-md bg-white object-contain" />
+      <img src="/images/LOGO_NT.svg" alt="" className="h-12 w-auto object-contain" />
       <span className="text-[15px] font-semibold tracking-tight text-stone-900">Navnikunj</span>
     </Link>
   );
@@ -323,7 +323,7 @@ export function AdminShell({ user, role = 'admin', children }: { user: string; r
             <aside className="relative flex h-full w-72 max-w-[85vw] flex-col bg-[#16100e]">
               <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
                 <Link href="/admin" className="flex items-center gap-3" onClick={() => setOpen(false)}>
-                  <img src="/images/logo.svg" alt="" className="h-10 w-auto rounded-lg bg-white object-contain px-1.5 py-1" />
+                  <img src="/images/LOGO_NT.svg" alt="" className="h-10 w-auto rounded-md bg-white object-contain p-1" />
                   <span className="text-sm font-semibold text-white">Admin</span>
                 </Link>
                 <button type="button" className="rounded-md p-2 text-white" aria-label="Close menu" onClick={() => setOpen(false)}>

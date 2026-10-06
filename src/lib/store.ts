@@ -6,6 +6,7 @@ import { withBanners } from './banners';
 import { withHeroSlides } from './hero';
 import { withHome } from './home';
 import { blankSite, createSeed } from './seed';
+import { asUserRole } from './types';
 import type {
   ContactMessage,
   Donation,
@@ -65,7 +66,7 @@ function mapUser(row: {
     username: row.username,
     displayName: row.display_name,
     email: row.email,
-    role: row.role === 'editor' ? 'editor' : 'admin',
+    role: asUserRole(row.role),
     active: row.active,
     at: iso(row.created_at),
   };
@@ -388,7 +389,7 @@ async function load(client: PoolClient): Promise<SiteData> {
   identity.latitude ||= '';
   identity.longitude ||= '';
   const stats = statRows.rows.map((row) => ({ value: row.value, label: row.label }));
-  const admin = userRows.rows.find((row) => row.active && row.role === 'admin') || userRows.rows[0];
+  const admin = userRows.rows.find((row) => row.active && (row.role === 'admin' || row.role === 'superAdmin')) || userRows.rows[0];
   const images = imageRows.rows.map(mapImage);
   const gallery: GalleryImage[] = [...imageRows.rows]
     .filter((image) => image.entity_type === 'gallery')

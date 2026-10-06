@@ -2,10 +2,11 @@ import { redirect } from 'next/navigation';
 import { UsersDesk } from '@/components/admin/UsersDesk';
 import { currentUser } from '@/lib/auth';
 import { getSite } from '@/lib/store';
+import { managesUsers } from '@/lib/types';
 
 export default async function UsersPage() {
   const user = await currentUser();
-  if (!user || user.role !== 'admin') redirect('/admin');
+  if (!user || !managesUsers(user.role)) redirect('/admin');
   const users = (await getSite()).users;
   return (
     <main>
