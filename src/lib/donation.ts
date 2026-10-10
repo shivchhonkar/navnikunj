@@ -1,12 +1,17 @@
+import { paymentProvider } from '@/lib/payments';
 import type { Donation, DonationReceipt } from '@/lib/types';
 
 const MODES: Record<string, string> = {
   card: 'Card',
+  credit_card: 'Card',
+  debit_card: 'Card',
   netbanking: 'Net banking',
+  net_banking: 'Net banking',
   wallet: 'Wallet',
   upi: 'UPI',
   emi: 'EMI',
   paylater: 'Pay later',
+  pay_later: 'Pay later',
 };
 
 export function paymentMode(method: string) {
@@ -52,7 +57,7 @@ export function donationReceipt(row: Donation, status: 'paid' | 'failed', messag
     amount: row.amount,
     at: row.at,
     paymentId: row.paymentId,
-    method: row.method || (status === 'paid' ? 'Razorpay' : ''),
+    method: row.method || (status === 'paid' ? (paymentProvider() === 'cashfree' ? 'Cashfree' : 'Razorpay') : ''),
     message,
   };
 }

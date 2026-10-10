@@ -140,7 +140,7 @@ export function DonorsDesk({ donors }: { donors: Donation[] }) {
                 <td className="px-3 py-3 whitespace-nowrap">{item.country || '—'}</td>
                 <td className="px-3 py-3 whitespace-nowrap">{new Date(item.at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
                 <td className="px-3 py-3 whitespace-nowrap font-mono text-xs">{item.paymentId || '—'}</td>
-                <td className="px-3 py-3 whitespace-nowrap">{item.method || (item.paymentId ? 'Razorpay' : 'Manual')}</td>
+                <td className="px-3 py-3 whitespace-nowrap">{item.method || (item.paymentId ? 'Online' : 'Manual')}</td>
                 <td className="px-3 py-3">
                   <button type="button" disabled={Boolean(removingId)} className="text-sm text-red-700 disabled:cursor-not-allowed disabled:opacity-50" onClick={() => remove(item.id)}>
                     {removingId === item.id ? 'Removing…' : 'Remove'}

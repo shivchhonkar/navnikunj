@@ -1,5 +1,6 @@
 import { applyPayment, donationReceipt, fetchRazorpayPayment } from '@/lib/donation';
 import { fail, json, text } from '@/lib/http';
+import { paymentProvider } from '@/lib/payments';
 import { updateSite } from '@/lib/store';
 
 export async function POST(request: Request) {
@@ -8,7 +9,7 @@ export async function POST(request: Request) {
   const paymentId = text(body.paymentId);
   const reason = text(body.reason);
   if (!orderId) return fail('Missing payment attempt');
-  const payment = paymentId ? await fetchRazorpayPayment(paymentId) : null;
+  const payment = paymentProvider() === 'razorpay' && paymentId ? await fetchRazorpayPayment(paymentId) : null;
   let receipt = null as ReturnType<typeof donationReceipt> | null;
   await updateSite((site) => {
     const row = site.donations.find((item) => item.orderId === orderId);

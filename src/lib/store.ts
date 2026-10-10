@@ -534,6 +534,3 @@ export function siteUrl() {
   return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:7200';
 }
 
-export function razorpayReady() {
-  return Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
-}
