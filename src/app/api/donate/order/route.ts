@@ -5,9 +5,6 @@ import { cashfreeReady, paymentProvider, razorpayReady } from '@/lib/payments';
 import { updateSite } from '@/lib/store';
 
 export async function POST(request: Request) {
-  const provider = paymentProvider();
-  if (provider === 'razorpay' && !razorpayReady()) return fail('Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env, then restart the app.', 503);
-  if (provider === 'cashfree' && !cashfreeReady()) return fail('Add CASHFREE_APP_ID and CASHFREE_SECRET_KEY in .env, then restart the app.', 503);
   const body = await request.json().catch(() => ({}));
   const name = text(body.name);
   const email = text(body.email);
@@ -16,15 +13,21 @@ export async function POST(request: Request) {
   const address = text(body.address);
   const country = text(body.country);
   const rupees = Number(body.amount);
-  if (!name || !email || !phone) return fail('Name, email, and phone are required');
-  if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) return fail('Enter a valid PAN, such as ABCDE1234F');
-  if (!address || !country) return fail('Address and country are required');
+  if (!name) return fail('Name is required');
   if (!Number.isFinite(rupees) || rupees < 1 || rupees > 1000000) return fail('Enter an amount between ₹1 and ₹10,00,000');
   const amount = Math.round(rupees * 100) / 100;
+  if (amount > 49000 && !pan) return fail('PAN is required for a donation above ₹49,000');
+  if (pan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) return fail('Enter a valid PAN, such as ABCDE1234F');
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail('Enter a valid email address');
+  if (phone.replace(/\D/g, '').length < 10) return fail('Enter a 10-digit phone number');
+
+  const provider = paymentProvider();
+  if (provider === 'razorpay' && !razorpayReady()) return fail('Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env, then restart the app.', 503);
+  if (provider === 'cashfree' && !cashfreeReady()) return fail('Add CASHFREE_APP_ID and CASHFREE_SECRET_KEY in .env, then restart the app.', 503);
 
   if (provider === 'cashfree') {
     const payablePhone = cashfreePhone(phone);
-    if (!payablePhone) return fail('Enter a 10-digit phone number for the payment.');
+    if (!payablePhone) return fail('Enter a 10-digit phone number so the payment page can open.');
     const orderId = `dn_${randomBytes(6).toString('hex')}`;
     const created = await createCashfreeOrder({ orderId, amount, name, email, phone: payablePhone });
     if (!created.ok) return fail(created.error, 502);

@@ -51,8 +51,8 @@ export async function createCashfreeOrder(input: { orderId: string; amount: numb
       customer_details: {
         customer_id: `cust_${input.orderId}`,
         customer_name: input.name,
-        customer_email: input.email,
-        customer_phone: input.phone,
+        ...(input.email ? { customer_email: input.email } : {}),
+        ...(input.phone ? { customer_phone: input.phone } : {}),
       },
       order_meta: {
         return_url: `${siteUrl()}/api/donate/cashfree/return?order_id={order_id}`,
