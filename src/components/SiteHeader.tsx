@@ -51,7 +51,7 @@ export function SiteHeader({ identity }: { identity: SiteData['identity'] }) {
           {/* <p className="min-w-0 truncate">{identity.name.toUpperCase()}</p> */}
           <div className="flex shrink-0 items-center gap-5">
             {identity.email && <a className={`hidden items-center gap-1.5 lg:inline-flex ${linkTone}`} href={`mailto:${identity.email}`}><Mail size={15} /> {identity.email}</a>}
-            {identity.phoneHref && <a className={`inline-flex items-center gap-1.5 ${linkTone}`} href={`tel:${identity.phoneHref}`}><Phone size={15} /> <span className="hidden sm:inline">{identity.phone}</span></a>}
+            {/* {identity.phoneHref && <a className={`inline-flex items-center gap-1.5 ${linkTone}`} href={`tel:${identity.phoneHref}`}><Phone size={15} /> <span className="hidden sm:inline">{identity.phone}</span></a>} */}
             <span className="hidden items-center gap-3 sm:inline-flex">
               {social.map((item) => {
                 const Icon = item.icon;
