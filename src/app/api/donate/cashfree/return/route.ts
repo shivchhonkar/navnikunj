@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server';
-import { siteUrl } from '@/lib/store';
 
-function resultUrl(request: Request) {
+function resultRedirect(request: Request, orderId = '') {
   const url = new URL(request.url);
-  const orderId = url.searchParams.get('order_id') || '';
-  return new URL(`/donate/result?order_id=${encodeURIComponent(orderId)}`, siteUrl());
+  const id = orderId || url.searchParams.get('order_id') || '';
+  return new NextResponse(null, {
+    status: 303,
+    headers: { Location: `/donate/result?order_id=${encodeURIComponent(id)}` },
+  });
 }
 
 export function GET(request: Request) {
-  return NextResponse.redirect(resultUrl(request));
+  return resultRedirect(request);
 }
 
 export async function POST(request: Request) {
@@ -18,5 +20,5 @@ export async function POST(request: Request) {
     const body = await request.formData().catch(() => null);
     orderId = body?.get('order_id')?.toString() || '';
   }
-  return NextResponse.redirect(new URL(`/donate/result?order_id=${encodeURIComponent(orderId)}`, siteUrl()));
+  return resultRedirect(request, orderId);
 }

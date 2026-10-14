@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto';
 import { cashfreePhone, createCashfreeOrder } from '@/lib/cashfree';
 import { fail, json, text } from '@/lib/http';
 import { cashfreeReady, paymentProvider, razorpayReady } from '@/lib/payments';
-import { getSite, updateSite } from '@/lib/store';
+import { getSite, requestOrigin, updateSite } from '@/lib/store';
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
@@ -33,7 +33,14 @@ export async function POST(request: Request) {
     const payablePhone = cashfreePhone(phone);
     if (!payablePhone) return fail('Enter a 10-digit phone number so the payment page can open.');
     const orderId = `dn_${randomBytes(6).toString('hex')}`;
-    const created = await createCashfreeOrder({ orderId, amount, name, email, phone: payablePhone });
+    const created = await createCashfreeOrder({
+      orderId,
+      amount,
+      name,
+      email,
+      phone: payablePhone,
+      returnUrl: `${requestOrigin(request)}/api/donate/cashfree/return?order_id={order_id}`,
+    });
     if (!created.ok) return fail(created.error, 502);
     await updateSite((site) => {
       site.donations.unshift({

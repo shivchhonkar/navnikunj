@@ -542,3 +542,21 @@ export function siteUrl() {
   return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:7200';
 }
 
+function publicHost(value: string) {
+  const host = value.split(',')[0]?.trim().replace(/^https?:\/\//, '') || '';
+  return /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(host) ? '' : host;
+}
+
+export function requestOrigin(request: Request) {
+  const browserOrigin = request.headers.get('origin') || '';
+  if (/^https:\/\//i.test(browserOrigin)) return browserOrigin.replace(/\/$/, '');
+  const url = new URL(request.url);
+  const host = publicHost(request.headers.get('x-forwarded-host') || '') || publicHost(request.headers.get('host') || '') || publicHost(url.host);
+  if (host) return `https://${host}`;
+  const configured = process.env.NEXT_PUBLIC_SITE_URL || '';
+  if (/^https:\/\//i.test(configured)) return configured.replace(/\/$/, '');
+  const forwardedProto = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim();
+  const proto = forwardedProto || url.protocol.replace(':', '') || 'http';
+  return `${proto}://${url.host}`;
+}
+

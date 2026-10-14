@@ -1,7 +1,7 @@
 import { creditCause } from '@/lib/causes';
 import { donationReceipt, paymentMode } from '@/lib/donation';
 import { cashfreeMode, cashfreeReady } from '@/lib/payments';
-import { siteUrl, updateSite } from '@/lib/store';
+import { updateSite } from '@/lib/store';
 import type { DonationReceipt } from '@/lib/types';
 
 const API_VERSION = '2023-08-01';
@@ -46,7 +46,7 @@ export function cashfreePhone(value: string) {
   return digits.length === 10 ? digits : '';
 }
 
-export async function createCashfreeOrder(input: { orderId: string; amount: number; name: string; email: string; phone: string }) {
+export async function createCashfreeOrder(input: { orderId: string; amount: number; name: string; email: string; phone: string; returnUrl: string }) {
   const response = await fetch(`${cashfreeBase()}/orders`, {
     method: 'POST',
     headers: cashfreeHeaders(),
@@ -62,7 +62,7 @@ export async function createCashfreeOrder(input: { orderId: string; amount: numb
         ...(input.phone ? { customer_phone: input.phone } : {}),
       },
       order_meta: {
-        return_url: `${siteUrl()}/api/donate/cashfree/return?order_id={order_id}`,
+        return_url: input.returnUrl,
       },
     }),
   });
