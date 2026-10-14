@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto';
 import { cashfreePhone, createCashfreeOrder } from '@/lib/cashfree';
 import { fail, json, text } from '@/lib/http';
 import { cashfreeReady, paymentProvider, razorpayReady } from '@/lib/payments';
-import { updateSite } from '@/lib/store';
+import { getSite, updateSite } from '@/lib/store';
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
@@ -12,11 +12,15 @@ export async function POST(request: Request) {
   const pan = text(body.pan).toUpperCase();
   const address = text(body.address);
   const country = text(body.country);
+  const causeSlug = text(body.causeSlug);
   const rupees = Number(body.amount);
+  const site = await getSite();
+  const cause = causeSlug ? site.causes.find((item) => item.slug === causeSlug && item.published) : undefined;
+  if (causeSlug && !cause) return fail('Choose a cause that is open for gifts.');
   if (!name) return fail('Name is required');
   if (!Number.isFinite(rupees) || rupees < 1 || rupees > 1000000) return fail('Enter an amount between ₹1 and ₹10,00,000');
   const amount = Math.round(rupees * 100) / 100;
-  if (amount > 49000 && !pan) return fail('PAN is required for a donation above ₹49,000');
+  if (amount > 49999 && !pan) return fail('PAN is required for a donation above ₹49,999');
   if (pan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) return fail('Enter a valid PAN, such as ABCDE1234F');
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail('Enter a valid email address');
   if (phone.replace(/\D/g, '').length < 10) return fail('Enter a 10-digit phone number');
@@ -41,6 +45,8 @@ export async function POST(request: Request) {
         address,
         country,
         amount,
+        causeSlug: cause?.slug || '',
+        causeTitle: cause?.title || '',
         orderId,
         paymentId: '',
         method: '',
@@ -73,6 +79,8 @@ export async function POST(request: Request) {
       address,
       country,
       amount,
+      causeSlug: cause?.slug || '',
+      causeTitle: cause?.title || '',
       orderId: order.id,
       paymentId: '',
       method: '',

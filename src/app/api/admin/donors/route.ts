@@ -27,6 +27,8 @@ export async function POST(request: Request) {
     address,
     country,
     amount,
+    causeSlug: '',
+    causeTitle: '',
     orderId: '',
     paymentId: '',
     method: 'Manual',

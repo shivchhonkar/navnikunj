@@ -103,7 +103,7 @@ export default async function HomePage() {
             </div>
           </div>
           {home.donation.buttonLabel ? (
-            <Link href="/donate" className="btn btn-light shrink-0">
+            <Link href="/donatekart" className="btn btn-light shrink-0">
               {home.donation.buttonLabel} <ArrowRight size={16} />
             </Link>
           ) : null}

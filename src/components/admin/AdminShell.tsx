@@ -6,13 +6,14 @@ import { CSSProperties, FormEvent, useEffect, useMemo, useRef, useState } from '
 import { AdminNotice, useAdminNotice } from '@/components/admin/AdminNotice';
 import { CONTENT_SECTIONS } from '@/lib/admin-content';
 import { POST_SECTIONS } from '@/lib/admin-posts';
-import { BarChart3, Bell, Calendar, ChevronDown, ChevronRight, ExternalLink, FileImage, FileText, Files, HandCoins, Images, IndianRupee, LayoutDashboard, LogOut, Mail, Menu, MessageSquare, Newspaper, PanelLeft, Search, UserRound, Users, X } from 'lucide-react';
+import { BarChart3, Bell, Calendar, ChevronDown, ChevronRight, ExternalLink, FileImage, FileText, Files, HandCoins, HeartHandshake, Images, IndianRupee, LayoutDashboard, LogOut, Mail, Menu, MessageSquare, Newspaper, PanelLeft, Search, UserRound, Users, X } from 'lucide-react';
 
 const LINKS = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard },
   { href: '/admin/content', label: 'Content', icon: FileText },
   { href: '/admin/pages', label: 'Pages', icon: Files },
   { href: '/admin/posts', label: 'News & events', icon: Newspaper },
+  { href: '/admin/causes', label: 'Causes', icon: HeartHandshake },
   { href: '/admin/gallery', label: 'Gallery', icon: Images },
   { href: '/admin/images', label: 'Images', icon: FileImage },
   { href: '/admin/messages', label: 'Messages', icon: Mail },

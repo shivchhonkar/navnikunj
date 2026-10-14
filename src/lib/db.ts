@@ -98,6 +98,8 @@ CREATE TABLE IF NOT EXISTS donations (
   payment_id TEXT NOT NULL DEFAULT '',
   method TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL CHECK (status IN ('created', 'paid', 'failed')),
+  cause_slug TEXT NOT NULL DEFAULT '',
+  cause_title TEXT NOT NULL DEFAULT '',
   sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -153,9 +155,12 @@ CREATE TABLE IF NOT EXISTS reports (
   created_by TEXT REFERENCES users (id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE donations ADD COLUMN IF NOT EXISTS cause_slug TEXT NOT NULL DEFAULT '';
+ALTER TABLE donations ADD COLUMN IF NOT EXISTS cause_title TEXT NOT NULL DEFAULT '';
 `;
 
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 const globalDb = globalThis as unknown as { navnikunjPool?: Pool; navnikunjReady?: Promise<void> | null; navnikunjSchema?: number };
 
 function connectionConfig() {

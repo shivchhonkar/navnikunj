@@ -1,6 +1,7 @@
 import { isAdmin } from '@/lib/auth';
 import { parseMapPoint } from '@/lib/map';
 import { withBanners } from '@/lib/banners';
+import { withCauses } from '@/lib/causes';
 import { withHeroSlides } from '@/lib/hero';
 import { withHome } from '@/lib/home';
 import { fail, json, slugify, text } from '@/lib/http';
@@ -75,6 +76,7 @@ export async function PUT(request: Request) {
         label: text(item.label),
       })).filter((item: { value: string; label: string }) => item.value && item.label);
     }
+    if (Array.isArray(body.causes)) site.causes = withCauses(body.causes);
     if (Array.isArray(body.programs)) {
       const used = new Set<string>();
       site.programs = body.programs.slice(0, 12).map((item: Partial<Program>) => {

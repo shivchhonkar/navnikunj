@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { confirmCashfreeOrder } from '@/lib/cashfree';
+import { creditCause } from '@/lib/causes';
 import { applyPayment, donationReceipt, fetchRazorpayPayment } from '@/lib/donation';
 import { fail, json, text } from '@/lib/http';
 import { paymentProvider } from '@/lib/payments';
@@ -20,8 +21,10 @@ async function verifyRazorpay(body: Record<string, unknown>) {
   await updateSite((site) => {
     const row = site.donations.find((item) => item.orderId === orderId);
     if (!row) return;
+    const alreadyPaid = row.status === 'paid';
     applyPayment(row, payment, paymentId);
     row.status = valid ? 'paid' : 'failed';
+    if (valid && !alreadyPaid) creditCause(site.causes, row.causeSlug, row.amount);
     receipt = donationReceipt(
       row,
       valid ? 'paid' : 'failed',

@@ -46,6 +46,7 @@ export function DonationsDesk({ donations }: { donations: Donation[] }) {
               <th className="px-3 py-2">When</th>
               <th className="px-3 py-2">Donor</th>
               <th className="px-3 py-2">Amount</th>
+              <th className="px-3 py-2">Cause</th>
               <th className="px-3 py-2">Status</th>
               <th className="px-3 py-2">Payment</th>
             </tr>
@@ -56,13 +57,14 @@ export function DonationsDesk({ donations }: { donations: Donation[] }) {
                 <td className="px-3 py-3 whitespace-nowrap">{new Date(item.at).toLocaleString('en-IN')}</td>
                 <td className="px-3 py-3">{item.name}<br /><span className="text-stone-500">{item.email} · {item.phone}</span></td>
                 <td className="px-3 py-3">₹{item.amount.toLocaleString('en-IN')}</td>
+                <td className="px-3 py-3">{item.causeTitle || '—'}</td>
                 <td className="px-3 py-3 capitalize">{item.status}</td>
                 <td className="px-3 py-3">{item.method || '—'}<br /><span className="text-stone-500">{item.paymentId || item.orderId}</span></td>
               </tr>
             ))}
             {!rows.length && (
               <tr>
-                <td className="px-3 py-6 text-stone-500" colSpan={5}>
+                <td className="px-3 py-6 text-stone-500" colSpan={6}>
                   {filter === 'all' ? 'No donation attempts yet.' : `No ${filter} donations.`}
                 </td>
               </tr>

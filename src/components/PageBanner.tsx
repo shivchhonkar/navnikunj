@@ -3,10 +3,16 @@ import type { PageBanner as Banner } from '@/lib/banners';
 
 export function PageBanner({ banner }: { banner: Banner }) {
   const team = banner.slug === 'team';
+  const donate = banner.slug === 'donate';
   return (
-    <section className="relative isolate overflow-hidden text-white">
+    <section className={`relative isolate overflow-hidden ${donate ? 'text-ink' : 'text-white'}`}>
       <img src={banner.image} alt="" className={`absolute inset-0 h-full w-full ${bannerPosition(banner.slug)}`} />
-      {team ? (
+      {donate ? (
+        <>
+          <img src={banner.image} alt="" className={`hero-blur-donate absolute inset-0 h-full w-full ${bannerPosition(banner.slug)}`} />
+          <div className="hero-wash-light-right-1 absolute inset-0" />
+        </>
+      ) : team ? (
         <>
           <img src={banner.image} alt="" className={`hero-blur-right absolute inset-0 h-full w-full ${bannerPosition(banner.slug)}`} />
           <div className="hero-wash-right absolute inset-0" />
@@ -17,7 +23,7 @@ export function PageBanner({ banner }: { banner: Banner }) {
       <div className={`shell relative flex items-center md:justify-end ${team ? 'min-h-[9.5rem] py-6 md:min-h-[11rem]' : 'min-h-[13rem] py-12 md:min-h-[17rem]'}`}>
         <div className="max-w-lg md:text-right">
           <h1 className="heading-xl">{banner.title}</h1>
-          {banner.text ? <p className="mt-3 text-base text-white/90 sm:text-lg">{banner.text}</p> : null}
+          {banner.text ? <p className={`mt-3 text-base sm:text-lg ${donate ? 'text-ink/80' : 'text-white/90'}`}>{banner.text}</p> : null}
         </div>
       </div>
     </section>

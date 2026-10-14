@@ -3,6 +3,7 @@ import { cache } from 'react';
 import type { PoolClient } from 'pg';
 import { withTransaction } from './db';
 import { withBanners } from './banners';
+import { withCauses } from './causes';
 import { withHeroSlides } from './hero';
 import { withHome } from './home';
 import { blankSite, createSeed } from './seed';
@@ -176,6 +177,7 @@ async function persist(client: PoolClient, site: SiteData) {
     { slug: 'programs', title: 'Programs', kind: 'programs', content: { count: site.programs.length } },
     { slug: 'home', title: 'Home page', kind: 'home', content: site.home },
     { slug: 'banners', title: 'Page banners', kind: 'banners', content: site.banners },
+    { slug: 'causes', title: 'Causes', kind: 'causes', content: site.causes },
   ];
   for (const page of pages) {
     await client.query(
@@ -242,13 +244,14 @@ async function persist(client: PoolClient, site: SiteData) {
   for (const [index, donation] of site.donations.entries()) {
     const donorId = await upsertDonor(client, donation);
     await client.query(
-      `INSERT INTO donations (id, donor_id, name, email, phone, pan, address, country, amount, order_id, payment_id, method, status, sort_order, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+      `INSERT INTO donations (id, donor_id, name, email, phone, pan, address, country, amount, order_id, payment_id, method, status, cause_slug, cause_title, sort_order, created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
        ON CONFLICT (id) DO UPDATE SET
          donor_id = EXCLUDED.donor_id, name = EXCLUDED.name, email = EXCLUDED.email, phone = EXCLUDED.phone,
          pan = EXCLUDED.pan, address = EXCLUDED.address, country = EXCLUDED.country, amount = EXCLUDED.amount,
          order_id = EXCLUDED.order_id, payment_id = EXCLUDED.payment_id, method = EXCLUDED.method,
-         status = EXCLUDED.status, sort_order = EXCLUDED.sort_order, created_at = EXCLUDED.created_at`,
+         status = EXCLUDED.status, cause_slug = EXCLUDED.cause_slug, cause_title = EXCLUDED.cause_title,
+         sort_order = EXCLUDED.sort_order, created_at = EXCLUDED.created_at`,
       [
         donation.id,
         donorId,
@@ -263,6 +266,8 @@ async function persist(client: PoolClient, site: SiteData) {
         donation.paymentId,
         donation.method,
         donation.status,
+        donation.causeSlug || '',
+        donation.causeTitle || '',
         index,
         stamp(donation.at),
       ],
@@ -370,7 +375,7 @@ async function load(client: PoolClient): Promise<SiteData> {
     client.query<{ id: string; slug: string; title: string; summary: string; body: string; icon: string; image: string }>(`SELECT id, slug, title, summary, body, icon, image FROM programs ORDER BY sort_order, title`),
     client.query<{ id: string; slug: string; kind: string; title: string; excerpt: string; body: string; image: string; post_date: string; location: string; keywords: string; published: boolean }>(`SELECT id, slug, kind, title, excerpt, body, image, post_date, location, keywords, published FROM posts ORDER BY sort_order, post_date DESC`),
     client.query<{ id: string; name: string; email: string; phone: string; message: string; created_at: Date }>(`SELECT id, name, email, phone, message, created_at FROM messages ORDER BY sort_order, created_at DESC`),
-    client.query<{ id: string; name: string; email: string; phone: string; pan: string; address: string; country: string; amount: string; order_id: string; payment_id: string; method: string; status: string; created_at: Date }>(`SELECT id, name, email, phone, pan, address, country, amount, order_id, payment_id, method, status, created_at FROM donations ORDER BY sort_order, created_at DESC`),
+    client.query<{ id: string; name: string; email: string; phone: string; pan: string; address: string; country: string; amount: string; order_id: string; payment_id: string; method: string; status: string; cause_slug: string; cause_title: string; created_at: Date }>(`SELECT id, name, email, phone, pan, address, country, amount, order_id, payment_id, method, status, cause_slug, cause_title, created_at FROM donations ORDER BY sort_order, created_at DESC`),
     client.query<{ id: string; username: string; password_hash: string; display_name: string; email: string; role: string; active: boolean; created_at: Date }>(`SELECT id, username, password_hash, display_name, email, role, active, created_at FROM users ORDER BY created_at`),
     client.query<{ id: string; filename: string; url: string; alt_text: string; size_bytes: number; mime_type: string; caption: string; entity_type: string; entity_id: string; sort_order: number; created_at: Date }>(`SELECT id, filename, url, alt_text, size_bytes, mime_type, caption, entity_type, entity_id, sort_order, created_at FROM images ORDER BY created_at DESC`),
     client.query<{ id: string; name: string; email: string; phone: string; city: string; skills: string; availability: string; status: string; notes: string; created_at: Date }>(`SELECT id, name, email, phone, city, skills, availability, status, notes, created_at FROM volunteers ORDER BY created_at DESC`),
@@ -435,6 +440,8 @@ async function load(client: PoolClient): Promise<SiteData> {
     address: row.address || '',
     country: row.country || '',
     amount: Number(row.amount) || 0,
+    causeSlug: row.cause_slug || '',
+    causeTitle: row.cause_title || '',
     orderId: row.order_id,
     paymentId: row.payment_id,
     method: row.method || '',
@@ -483,6 +490,7 @@ async function load(client: PoolClient): Promise<SiteData> {
     cta: { ...fallback.cta, ...content('donation', fallback.cta) },
     home: withHome(content('home', fallback.home)),
     banners: withBanners(content('banners', fallback.banners)),
+    causes: withCauses(pagesBySlug.get('causes')?.content ?? undefined),
     programs,
     posts,
     gallery,

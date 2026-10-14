@@ -56,6 +56,35 @@ export type ContactMessage = {
   at: string;
 };
 
+export type CauseProduct = {
+  id: string;
+  name: string;
+  image: string;
+  needed: number;
+  price: number;
+  featured: boolean;
+};
+
+export type Cause = {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  story: string;
+  image: string;
+  images: string[];
+  location: string;
+  organizer: string;
+  caption: string;
+  raised: number;
+  goal: number;
+  donors: number;
+  urgent: boolean;
+  taxBenefit: boolean;
+  published: boolean;
+  products: CauseProduct[];
+};
+
 export type Donation = {
   id: string;
   name: string;
@@ -65,6 +94,8 @@ export type Donation = {
   address: string;
   country: string;
   amount: number;
+  causeSlug: string;
+  causeTitle: string;
   orderId: string;
   paymentId: string;
   method: string;
@@ -183,6 +214,7 @@ export type SiteData = {
   stats: { value: string; label: string }[];
   about: { eyebrow: string; title: string; text: string; quote: string; image: string };
   cta: { title: string; text: string };
+  causes: Cause[];
   home: HomePageSettings;
   banners: { slug: string; title: string; text: string; image: string }[];
   programs: Program[];

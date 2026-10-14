@@ -69,7 +69,7 @@ export const PAGE_BANNERS: BannerDefault[] = [
     label: 'Donate',
     title: 'Donate',
     text: 'Support Navnikunj Foundation with an online donation.',
-    image: '/images/banner_images/banner-smile-face.jpeg',
+    image: '/images/banner_images/joyful-schoolchildren-banner.png',
     position: 'object-cover',
   },
 ];

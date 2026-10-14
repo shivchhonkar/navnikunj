@@ -1,14 +1,14 @@
 'use client';
 
 import { FormEvent, useEffect, useRef, useState, type ReactNode } from 'react';
-import { ArrowRight, Check, Globe, HandHeart, IdCard, Mail, MapPin, Phone, ShieldCheck, User } from 'lucide-react';
+import { ArrowRight, Check, Globe, HandHeart, IdCard, Mail, MapPin, Phone, ShieldCheck, User, X } from 'lucide-react';
 import { DonateReceipt } from '@/components/DonateReceipt';
 import type { DonationReceipt } from '@/lib/types';
 
 const COUNTRIES = ['India', 'United States', 'United Kingdom', 'United Arab Emirates', 'Canada', 'Australia', 'Singapore', 'Nepal', 'Other'];
 
 const PRESETS = [5000, 10000, 25000, 51000];
-const PAN_ABOVE = 49000;
+const PAN_ABOVE = 49999;
 const PAN_PATTERN = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 function controlClass(invalid?: boolean) {
   return `w-full rounded-xl border bg-white py-2.5 text-sm text-ink outline-none placeholder:text-stone-400 focus:border-brand ${invalid ? 'border-red-600' : 'border-line'}`;
@@ -123,16 +123,44 @@ function FieldShell({
 
 type FieldErrors = Partial<Record<'amount' | 'name' | 'email' | 'phone' | 'pan', string>>;
 
-export function DonateForm({ provider, configured }: { provider: 'cashfree' | 'razorpay'; configured: boolean }) {
+export function DonateForm({
+  provider,
+  configured,
+  causeSlug = '',
+  causeTitle = '',
+  initialAmount,
+  lockAmount = false,
+  dialog = false,
+  onClose,
+}: {
+  provider: 'cashfree' | 'razorpay';
+  configured: boolean;
+  causeSlug?: string;
+  causeTitle?: string;
+  initialAmount?: number;
+  lockAmount?: boolean;
+  dialog?: boolean;
+  onClose?: () => void;
+}) {
   const formRef = useRef<HTMLFormElement>(null);
-  const [amountInput, setAmountInput] = useState('5000');
+  const [amountInput, setAmountInput] = useState(() => String(initialAmount && initialAmount > 0 ? Math.round(initialAmount) : 5000));
   const [pan, setPan] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
   const [receipt, setReceipt] = useState<DonationReceipt | null>(null);
+  const [showAddress, setShowAddress] = useState(false);
   const rupees = rupeesOf(amountInput);
   const panRequired = Number.isFinite(rupees) && rupees > PAN_ABOVE;
+
+  useEffect(() => {
+    if (initialAmount && initialAmount > 0) setAmountInput(String(Math.round(initialAmount)));
+  }, [initialAmount]);
+
+  useEffect(() => {
+    if (!dialog) return;
+    document.getElementById(lockAmount ? 'donation-name' : 'donation-amount')?.focus();
+  }, [dialog, lockAmount]);
 
   useEffect(() => {
     const loading = provider === 'cashfree'
@@ -162,7 +190,7 @@ export function DonateForm({ provider, configured }: { provider: 'cashfree' | 'r
     if (!name.trim()) nextErrors.name = 'Enter your name.';
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) nextErrors.email = 'Enter a valid email, or leave this blank.';
     if (phone.replace(/\D/g, '').length < 10) nextErrors.phone = 'Enter a 10-digit phone number.';
-    if (panRequired && !panValue) nextErrors.pan = 'PAN is required for a donation above ₹49,000.';
+    if (panRequired && !panValue) nextErrors.pan = 'PAN is required for a donation above ₹49,999.';
     else if (panValue && !PAN_PATTERN.test(panValue)) nextErrors.pan = panRequired ? 'Enter a valid PAN, such as ABCDE1234F.' : 'Enter a valid PAN, such as ABCDE1234F, or leave this blank.';
     if (Object.keys(nextErrors).length) {
       setFieldErrors(nextErrors);
@@ -190,6 +218,7 @@ export function DonateForm({ provider, configured }: { provider: 'cashfree' | 'r
         pan: panValue,
         address: form.get('address'),
         country: form.get('country'),
+        causeSlug,
       }),
     });
     const data = await response.json().catch(() => ({}));
@@ -285,18 +314,46 @@ export function DonateForm({ provider, configured }: { provider: 'cashfree' | 'r
   };
 
   const payLabel = provider === 'cashfree' ? 'Donate with Cashfree' : 'Donate with Razorpay';
+  const amountLabel = Number.isFinite(rupees) && rupees > 0 ? money(rupees) : '';
+  const addressFields = (
+    <>
+      <FieldShell id="donation-address" label="Address" optional icon={<MapPin size={16} />}>
+        <textarea id="donation-address" name="address" rows={2} placeholder="Enter your address" className={`${controlClass()} pl-10 pr-3`} autoComplete="street-address" />
+      </FieldShell>
+      <div className="sm:max-w-[calc(50%-0.5rem)]">
+        <FieldShell id="donation-country" label="Country" optional icon={<Globe size={16} />}>
+          <select id="donation-country" name="country" defaultValue="India" className={`${controlClass()} appearance-none pl-10 pr-8`}>
+            {COUNTRIES.map((country) => <option key={country} value={country}>{country}</option>)}
+          </select>
+        </FieldShell>
+      </div>
+    </>
+  );
 
   return (
-    <form ref={formRef} onSubmit={submit} className="card space-y-5 border border-line p-5 sm:p-6">
-      <div className="flex items-start gap-3 rounded-2xl bg-sand px-4 py-3">
+    <form ref={formRef} onSubmit={submit} className={dialog ? 'flex max-h-[min(92vh,40rem)] flex-col overflow-hidden rounded-t-card bg-white shadow-card sm:rounded-card' : 'card space-y-5 border border-line p-5 sm:p-6'}>
+      <div className={`flex items-center gap-3 bg-sand ${dialog ? 'px-4 py-3' : 'items-start rounded-2xl px-4 py-3'}`}>
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-brand">
           <HandHeart size={18} />
         </span>
-        <span>
-          <span className="block font-semibold text-ink">Choose your donation amount</span>
-          <span className="mt-0.5 block text-xs text-muted">Select an amount or enter your own</span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold text-ink">{lockAmount ? 'Your gift' : 'Choose your donation amount'}</span>
+          <span className="mt-0.5 block truncate text-xs text-muted">
+            {causeTitle ? `For ${causeTitle}` : 'Select an amount or enter your own'}
+          </span>
+          {dialog && lockAmount && amountLabel ? <span className="mt-1 block text-xl font-semibold text-ink">{amountLabel}</span> : null}
         </span>
+        {dialog && onClose ? (
+          <button type="button" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink hover:bg-white" aria-label="Close" onClick={onClose}>
+            <X size={16} />
+          </button>
+        ) : null}
       </div>
+      <div className={dialog ? 'min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4' : 'space-y-5'}>
+      {dialog && lockAmount ? null : lockAmount ? (
+        <p className="text-2xl font-semibold text-ink">{amountLabel}</p>
+      ) : (
+      <>
       <fieldset>
         <legend className="sr-only">Suggested amounts</legend>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -344,7 +401,9 @@ export function DonateForm({ provider, configured }: { provider: 'cashfree' | 'r
           {fieldErrors.amount || 'A suggested amount fills this field. You can change it before you pay.'}
         </span>
       </label>
-      <div className="flex items-center gap-2 border-t border-line pt-4 text-ink">
+      </>
+      )}
+      <div className={`flex items-center gap-2 text-ink ${dialog ? '' : 'border-t border-line pt-4'}`}>
         <User size={18} className="text-brand" />
         <h3 className="text-base font-semibold">Your details</h3>
       </div>
@@ -364,7 +423,7 @@ export function DonateForm({ provider, configured }: { provider: 'cashfree' | 'r
           required={panRequired}
           optional={!panRequired}
           error={fieldErrors.pan}
-          hint={panRequired ? 'Required for a donation above ₹49,000.' : 'Needed only when the amount is above ₹49,000.'}
+          hint={panRequired ? 'Required above ₹49,999.' : 'Only above ₹49,999.'}
           icon={<IdCard size={16} />}
         >
           <input
@@ -384,24 +443,25 @@ export function DonateForm({ provider, configured }: { provider: 'cashfree' | 'r
           />
         </FieldShell>
       </div>
-      <FieldShell id="donation-address" label="Address" optional icon={<MapPin size={16} />}>
-        <textarea id="donation-address" name="address" rows={2} placeholder="Enter your address" className={`${controlClass()} pl-10 pr-3`} autoComplete="street-address" />
-      </FieldShell>
-      <div className="sm:max-w-[calc(50%-0.5rem)]">
-        <FieldShell id="donation-country" label="Country" optional icon={<Globe size={16} />}>
-          <select id="donation-country" name="country" defaultValue="India" className={`${controlClass()} appearance-none pl-10 pr-8`}>
-            {COUNTRIES.map((country) => <option key={country} value={country}>{country}</option>)}
-          </select>
-        </FieldShell>
+      {dialog ? (
+        <button type="button" className="text-sm font-semibold text-brand" onClick={() => setShowAddress((open) => !open)}>
+          {showAddress ? 'Hide address' : 'Add address (optional)'}
+        </button>
+      ) : null}
+      {dialog ? (showAddress ? addressFields : (
+        <input type="hidden" name="country" value="India" />
+      )) : addressFields}
       </div>
+      <div className={dialog ? 'space-y-3 border-t border-line px-5 py-4' : 'space-y-3'}>
       {!configured && <p className="rounded-lg bg-sand px-3 py-2 text-sm text-brandDark">{provider === 'cashfree' ? 'Add CASHFREE_APP_ID and CASHFREE_SECRET_KEY in .env, then restart the app.' : 'Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env, then restart the app.'}</p>}
       {error && <p className="text-sm text-red-700" role="alert">{error}</p>}
       <button disabled={pending} className="btn btn-brand w-full justify-center py-3.5 disabled:opacity-60">
         <ShieldCheck size={16} />
-        {pending ? 'Opening checkout…' : payLabel}
+        {pending ? 'Opening checkout…' : dialog && amountLabel ? `Pay ${amountLabel}` : payLabel}
         <ArrowRight size={16} />
       </button>
       {receipt && <DonateReceipt receipt={receipt} onClose={() => setReceipt(null)} />}
+      </div>
     </form>
   );
 }

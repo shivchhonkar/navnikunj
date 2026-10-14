@@ -1,4 +1,5 @@
 import { defaultBanners } from './banners';
+import { defaultCauses } from './causes';
 import { defaultHome } from './home';
 import { PROGRAM_PHOTOS } from './programs';
 import { DEMO_PASSWORD, hashPassword } from './password';
@@ -56,6 +57,7 @@ function buildSite(passwordHash: string): SiteData {
       title: 'Be part of the change',
       text: 'Your support keeps school kits, health camps, and family relief moving. Give once, or come back when you can.',
     },
+    causes: defaultCauses(),
     home: defaultHome(),
     banners: defaultBanners(),
     programs: [
