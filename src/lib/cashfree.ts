@@ -1,3 +1,4 @@
+import { creditCause } from '@/lib/causes';
 import { donationReceipt, paymentMode } from '@/lib/donation';
 import { cashfreeMode, cashfreeReady } from '@/lib/payments';
 import { siteUrl, updateSite } from '@/lib/store';
@@ -23,12 +24,18 @@ function cashfreeBase() {
   return cashfreeMode() === 'production' ? 'https://api.cashfree.com/pg' : 'https://sandbox.cashfree.com/pg';
 }
 
+function cashfreeValue(name: string) {
+  const value = (process.env[name] || '').trim();
+  if ((value.startsWith("'") && value.endsWith("'")) || (value.startsWith('"') && value.endsWith('"'))) return value.slice(1, -1).trim();
+  return value;
+}
+
 function cashfreeHeaders() {
   return {
     'Content-Type': 'application/json',
     'x-api-version': API_VERSION,
-    'x-client-id': process.env.CASHFREE_APP_ID || '',
-    'x-client-secret': process.env.CASHFREE_SECRET_KEY || '',
+    'x-client-id': cashfreeValue('CASHFREE_APP_ID'),
+    'x-client-secret': cashfreeValue('CASHFREE_SECRET_KEY'),
   };
 }
 
@@ -61,7 +68,11 @@ export async function createCashfreeOrder(input: { orderId: string; amount: numb
   });
   const order = await response.json().catch(() => ({})) as CashfreeOrder;
   if (!response.ok || !order.payment_session_id) {
-    return { ok: false as const, error: order.message || 'Cashfree could not open the payment' };
+    const authFailed = /auth/i.test(order.message || '');
+    const sandboxHint = authFailed && cashfreeMode() !== 'production'
+      ? ' Production keys need CASHFREE_ENV=production.'
+      : '';
+    return { ok: false as const, error: `${order.message || 'Cashfree could not open the payment'}${sandboxHint}` };
   }
   return { ok: true as const, paymentSessionId: order.payment_session_id, mode: cashfreeMode() };
 }
@@ -99,7 +110,8 @@ export async function confirmCashfreeOrder(orderId: string): Promise<{ ok: boole
       missing = true;
       return;
     }
-    if (row.status === 'paid') {
+    const alreadyPaid = row.status === 'paid';
+    if (alreadyPaid) {
       receipt = donationReceipt(row, 'paid', 'Your gift is confirmed. Thank you for standing with the foundation.');
       return;
     }
@@ -118,6 +130,7 @@ export async function confirmCashfreeOrder(orderId: string): Promise<{ ok: boole
     if (payment?.cf_payment_id) row.paymentId = String(payment.cf_payment_id);
     row.method = paymentMode(payment?.payment_group || '') || (paid ? 'Cashfree' : row.method);
     row.status = paid ? 'paid' : 'failed';
+    if (paid) creditCause(site.causes, row.causeSlug, row.amount);
     receipt = donationReceipt(
       row,
       paid ? 'paid' : 'failed',
