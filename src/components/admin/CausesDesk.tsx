@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useRef, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDeskNotice } from '@/components/admin/AdminNotice';
 import type { Cause, CauseProduct } from '@/lib/types';
@@ -48,8 +48,51 @@ export function CausesDesk({ causes }: { causes: Cause[] }) {
   const [pending, setPending] = useState(false);
   const [rows, setRows] = useState(causes);
   const [selected, setSelected] = useState(0);
+  const [confirming, setConfirming] = useState<number | null>(null);
   const { show, clear } = useDeskNotice();
   const cause = rows[selected];
+  const confirmingCause = confirming === null ? null : rows[confirming];
+
+  useEffect(() => {
+    if (confirming === null) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setConfirming(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [confirming]);
+
+  const removeCause = async () => {
+    if (confirming === null || busy.current) return;
+    const index = confirming;
+    const removed = rows[index];
+    const next = rows.filter((_, itemIndex) => itemIndex !== index);
+    busy.current = true;
+    setPending(true);
+    clear();
+    try {
+      const response = await fetch('/api/admin/site', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ causes: next }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        show('error', data.error || 'The cause could not be removed.');
+        return;
+      }
+      setRows(next);
+      setSelected(Math.max(0, Math.min(index, Math.max(next.length - 1, 0))));
+      setConfirming(null);
+      show('success', `${removed?.title || 'Cause'} removed.`);
+      router.refresh();
+    } catch {
+      show('error', 'The cause could not be removed. Try again.');
+    } finally {
+      busy.current = false;
+      setPending(false);
+    }
+  };
 
   const patch = (next: Partial<Cause>) => {
     setRows((current) => current.map((item, index) => index === selected ? { ...item, ...next } : item));
@@ -136,7 +179,7 @@ export function CausesDesk({ causes }: { causes: Cause[] }) {
             <div className="flex flex-wrap gap-2 text-sm">
               <button type="button" className="rounded-full border border-stone-300 px-3 py-1.5" disabled={selected === 0} onClick={() => { const next = [...rows]; [next[selected - 1], next[selected]] = [next[selected], next[selected - 1]]; setRows(next); setSelected(selected - 1); }}>Move up</button>
               <button type="button" className="rounded-full border border-stone-300 px-3 py-1.5" disabled={selected === rows.length - 1} onClick={() => { const next = [...rows]; [next[selected + 1], next[selected]] = [next[selected], next[selected + 1]]; setRows(next); setSelected(selected + 1); }}>Move down</button>
-              <button type="button" className="rounded-full border border-red-200 px-3 py-1.5 text-red-700" onClick={() => { const next = rows.filter((_, index) => index !== selected); setRows(next); setSelected(Math.max(0, selected - 1)); }}>Remove</button>
+              <button type="button" className="rounded-full border border-red-200 px-3 py-1.5 text-red-700" onClick={() => setConfirming(selected)}>Remove</button>
             </div>
           </div>
 
@@ -224,6 +267,18 @@ export function CausesDesk({ causes }: { causes: Cause[] }) {
           <button type="button" className="ml-2 font-semibold text-brand" onClick={() => { setRows([blankCause()]); setSelected(0); }}>Add the first cause</button>
         </div>
       )}
+      {confirmingCause ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setConfirming(null)}>
+          <div role="dialog" aria-modal="true" aria-labelledby="remove-cause-title" className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg" onClick={(event) => event.stopPropagation()}>
+            <h2 id="remove-cause-title" className="text-xl">Remove this cause?</h2>
+            <p className="mt-2 text-sm leading-6 text-stone-600">{confirmingCause.title || 'Untitled cause'} will be removed from the public donate page.</p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button type="button" className="rounded-full px-4 py-2 text-sm font-semibold text-stone-600" disabled={pending} onClick={() => setConfirming(null)}>Cancel</button>
+              <button type="button" className="rounded-full bg-red-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60" disabled={pending} onClick={removeCause}>{pending ? 'Removing…' : 'Remove cause'}</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </form>
   );
 }
