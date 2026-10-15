@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, MapPin, Share2 } from 'lucide-react';
 import { DonateForm } from '@/components/DonateForm';
+import { inter } from '@/fonts/inter';
 import { inr } from '@/lib/causes';
 import type { Cause } from '@/lib/types';
 
@@ -216,7 +217,7 @@ export function CauseKart({
         )}
       </div>
       {mounted && pay ? createPortal(
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/50 p-0 sm:items-center sm:p-4" onClick={() => setPay(null)}>
+        <div className={`${inter.className} fixed inset-0 z-50 flex items-end justify-center bg-ink/50 p-0 sm:items-center sm:p-4`} onClick={() => setPay(null)}>
           <div
             role="dialog"
             aria-modal="true"
