@@ -3,18 +3,21 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Facebook, Instagram, Linkedin, Mail, MapPin, Menu, Phone, X, Youtube } from 'lucide-react';
+import { ChevronDown, Facebook, Instagram, Linkedin, Mail, MapPin, Menu, Phone, X, Youtube } from 'lucide-react';
 import type { SiteData } from '@/lib/types';
 
 const NAV = [
   { href: '/', label: 'Home' },
-  { href: '/about', label: 'About Us' },
-  { href: '/team', label: 'Our Team' },
+  { href: '/about', label: 'About Us', children: [{ href: '/team', label: 'Our Team' }] },
   { href: '/programs', label: 'Programs' },
   { href: '/gallery', label: 'Gallery' },
   { href: '/news', label: 'News & Updates' },
   { href: '/contact', label: 'Contact' },
 ];
+
+function isCurrent(pathname: string, href: string) {
+  return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export function SiteHeader({ identity }: { identity: SiteData['identity'] }) {
   const pathname = usePathname();
@@ -70,11 +73,27 @@ export function SiteHeader({ identity }: { identity: SiteData['identity'] }) {
         <div className="ml-auto hidden items-center gap-10 lg:flex">
           <nav className="flex items-center gap-7 text-[15px]" aria-label="Primary">
             {NAV.map((item) => {
-              const active = item.href === '/' ? pathname === '/' : pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const active = isCurrent(pathname, item.href) || item.children?.some((child) => isCurrent(pathname, child.href));
+              const mark = `relative inline-flex items-center gap-1 py-1 ${linkTone} ${active ? 'after:absolute after:-bottom-1.5 after:left-1/2 after:h-0.5 after:w-7 after:-translate-x-1/2 after:rounded-full after:bg-[#e07a2f]' : ''}`;
+              if (!item.children?.length) {
+                return <Link key={item.href} href={item.href} className={mark}>{item.label}</Link>;
+              }
               return (
-                <Link key={item.href} href={item.href} className={`relative inline-flex items-center py-1 ${linkTone} ${active ? 'after:absolute after:-bottom-1.5 after:left-1/2 after:h-0.5 after:w-7 after:-translate-x-1/2 after:rounded-full after:bg-[#e07a2f]' : ''}`}>
-                  {item.label}
-                </Link>
+                <div key={item.href} className="group relative">
+                  <Link href={item.href} className={mark} aria-haspopup="true">
+                    {item.label}
+                    <ChevronDown size={14} className="text-stone-400 transition group-hover:text-brand" aria-hidden />
+                  </Link>
+                  <div className="invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                    <div className="-ml-3 min-w-[9.5rem] overflow-hidden rounded-lg border border-line bg-white py-1 shadow-md">
+                      {item.children.map((child) => (
+                        <Link key={child.href} href={child.href} className={`block whitespace-nowrap px-3 py-2 text-[15px] leading-6 ${isCurrent(pathname, child.href) ? 'bg-sand text-brand' : 'text-ink hover:bg-sand hover:text-brand'}`}>
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               );
             })}
           </nav>
@@ -90,7 +109,12 @@ export function SiteHeader({ identity }: { identity: SiteData['identity'] }) {
       {open && (
         <nav className="space-y-1 border-t border-line px-page py-3 lg:hidden" aria-label="Mobile">
           {NAV.map((item) => (
-            <Link key={item.href} href={item.href} className="block rounded-md px-2 py-2.5 text-sm text-ink hover:bg-sand" onClick={() => setOpen(false)}>{item.label}</Link>
+            <div key={item.href}>
+              <Link href={item.href} className="block rounded-md px-2 py-2.5 text-sm text-ink hover:bg-sand" onClick={() => setOpen(false)}>{item.label}</Link>
+              {item.children?.map((child) => (
+                <Link key={child.href} href={child.href} className="block rounded-md py-2 pl-6 pr-2 text-sm text-stone-600 hover:bg-sand hover:text-ink" onClick={() => setOpen(false)}>{child.label}</Link>
+              ))}
+            </div>
           ))}
         </nav>
       )}
