@@ -1,4 +1,5 @@
 export const CONTENT_SECTIONS = [
+  { href: '/admin/content/theme', label: 'Theme', hint: 'Brand colour, header, page background, and hero banner gradients.' },
   { href: '/admin/content/homePage', label: 'Home page', hint: 'Show, hide, and edit the sections on the home page.' },
   { href: '/admin/content/contact', label: 'Contact details', hint: 'Name, address, phone, email, and social links.' },
   { href: '/admin/content/hero', label: 'Home hero banner', hint: 'Slides for the home page. Headlines can be reused across slides.' },

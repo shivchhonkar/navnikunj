@@ -74,7 +74,7 @@ export function SiteHeader({ identity }: { identity: SiteData['identity'] }) {
           <nav className="flex items-center gap-7 text-[15px]" aria-label="Primary">
             {NAV.map((item) => {
               const active = isCurrent(pathname, item.href) || item.children?.some((child) => isCurrent(pathname, child.href));
-              const mark = `relative inline-flex items-center gap-1 py-1 ${linkTone} ${active ? 'after:absolute after:-bottom-1.5 after:left-1/2 after:h-0.5 after:w-7 after:-translate-x-1/2 after:rounded-full after:bg-[#e07a2f]' : ''}`;
+              const mark = `relative inline-flex items-center gap-1 py-1 ${linkTone} ${active ? 'after:absolute after:-bottom-1.5 after:left-1/2 after:h-0.5 after:w-7 after:-translate-x-1/2 after:rounded-full after:bg-brand' : ''}`;
               if (!item.children?.length) {
                 return <Link key={item.href} href={item.href} className={mark}>{item.label}</Link>;
               }

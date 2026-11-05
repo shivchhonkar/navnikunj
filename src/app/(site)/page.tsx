@@ -34,7 +34,7 @@ export default async function HomePage() {
       <HeroBanner eyebrow={site.hero.eyebrow} slides={site.hero.slides} />
 
       {home.stats.visible && site.stats.length ? (
-      <section className="relative overflow-hidden border-b border-line bg-[#FCF2E4]" aria-label="Impact">
+      <section className="relative overflow-hidden border-b border-line" style={{ backgroundColor: home.stats.color }} aria-label="Impact">
         <img src={home.stats.image || '/images/bg_images/stats_bg.png'} alt="" className="pointer-events-none absolute left-1/2 top-0 h-full w-[112%] max-w-none -translate-x-1/2 object-fill" />
         <dl className="relative mx-auto grid w-full max-w-[76rem] grid-cols-2 px-[18%] md:grid-cols-4 md:px-[11%]">
           {site.stats.map((item, index) => {

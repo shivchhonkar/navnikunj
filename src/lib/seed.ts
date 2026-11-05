@@ -1,4 +1,5 @@
 import { defaultBanners } from './banners';
+import { DEFAULT_THEME } from './theme';
 import { defaultCauses } from './causes';
 import { defaultHome } from './home';
 import { PROGRAM_PHOTOS } from './programs';
@@ -26,6 +27,7 @@ function buildSite(passwordHash: string): SiteData {
       youtube: '',
       linkedin: '',
     },
+    theme: { ...DEFAULT_THEME },
     hero: {
       eyebrow: 'Serving society through',
       title: 'Kindness that opens a better tomorrow',

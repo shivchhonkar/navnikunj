@@ -1,8 +1,11 @@
+import { hexChannels } from './theme';
 import type { HomePageSettings } from './types';
+
+export const STATS_BACKGROUND = '#fcf2e4';
 
 export function defaultHome(): HomePageSettings {
   return {
-    stats: { visible: true, image: '/images/bg_images/stats_bg.png' },
+    stats: { visible: true, image: '/images/bg_images/stats_bg.png', color: STATS_BACKGROUND },
     work: {
       visible: true,
       eyebrow: 'Our focus areas',
@@ -34,6 +37,10 @@ function on(value: unknown, fallback: boolean) {
   return typeof value === 'boolean' ? value : fallback;
 }
 
+function color(value: unknown, fallback: string) {
+  return typeof value === 'string' && hexChannels(value) ? value.trim().toLowerCase() : fallback;
+}
+
 function section<T extends object>(value: T | undefined): Partial<T> {
   return value && typeof value === 'object' ? value : {};
 }
@@ -48,7 +55,7 @@ export function withHome(value: unknown): HomePageSettings {
   const news = section(source.news);
   const donationImage = str(donation.image, base.donation.image);
   return {
-    stats: { visible: on(stats.visible, base.stats.visible), image: str(stats.image, base.stats.image) },
+    stats: { visible: on(stats.visible, base.stats.visible), image: str(stats.image, base.stats.image), color: color(stats.color, base.stats.color) },
     work: {
       visible: on(work.visible, base.work.visible),
       eyebrow: str(work.eyebrow, base.work.eyebrow),

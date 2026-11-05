@@ -313,7 +313,7 @@ export function AdminShell({ user, role = 'admin', children }: { user: string; r
       </header>
 
       <div className="flex">
-        <aside className={`relative sticky top-16 hidden h-[calc(100vh-4rem)] shrink-0 flex-col bg-[#16100e] transition-[width] duration-200 lg:flex ${collapsed ? 'w-[4.5rem]' : 'w-64'}`}>
+        <aside className={`relative sticky top-16 hidden h-[calc(100vh-4rem)] shrink-0 flex-col bg-chrome transition-[width] duration-200 lg:flex ${collapsed ? 'w-[4.5rem]' : 'w-64'}`}>
           <NavLinks pathname={pathname} collapsed={collapsed} links={links} />
           {actions}
         </aside>
@@ -321,7 +321,7 @@ export function AdminShell({ user, role = 'admin', children }: { user: string; r
         {open && (
           <div className="fixed inset-0 z-40 lg:hidden">
             <button type="button" className="absolute inset-0 bg-black/50" aria-label="Close menu" onClick={() => setOpen(false)} />
-            <aside className="relative flex h-full w-72 max-w-[85vw] flex-col bg-[#16100e]">
+            <aside className="relative flex h-full w-72 max-w-[85vw] flex-col bg-chrome">
               <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
                 <Link href="/admin" className="flex items-center gap-3" onClick={() => setOpen(false)}>
                   <img src="/images/LOGO_NT.svg" alt="" className="h-10 w-auto rounded-md bg-white object-contain p-1" />

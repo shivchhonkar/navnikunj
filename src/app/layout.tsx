@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { inter } from '@/fonts/inter';
 import { getSite, siteUrl } from '@/lib/store';
+import { themeVars } from '@/lib/theme';
 import './globals.css';
 
 export const dynamic = 'force-dynamic';
@@ -42,7 +43,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     logo: `${siteUrl()}/images/logo.svg`,
   };
   return (
-    <html lang="en">
+    <html lang="en" style={themeVars(site.theme)}>
       <body className={`${inter.variable} font-sans antialiased`}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         {children}

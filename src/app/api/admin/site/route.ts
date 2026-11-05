@@ -4,8 +4,10 @@ import { withBanners } from '@/lib/banners';
 import { withCauses } from '@/lib/causes';
 import { withHeroSlides } from '@/lib/hero';
 import { withHome } from '@/lib/home';
+import { hexChannels } from '@/lib/theme';
 import { fail, json, slugify, text } from '@/lib/http';
 import { updateSite } from '@/lib/store';
+import { readTheme } from '@/lib/theme';
 import type { Program, ProgramIcon } from '@/lib/types';
 import { randomBytes } from 'crypto';
 
@@ -35,7 +37,14 @@ export async function PUT(request: Request) {
     if ((latitude && !longitude) || (!latitude && longitude)) return fail('Enter both latitude and longitude.');
     if (latitude && longitude && !parseMapPoint(`${latitude},${longitude}`)) return fail('Check the latitude and longitude.');
   }
+  const theme = body.theme && typeof body.theme === 'object' ? readTheme(body.theme) : null;
+  if (theme && 'error' in theme) return fail(theme.error);
+  if (body.home && typeof body.home === 'object' && body.home.stats && typeof body.home.stats === 'object') {
+    const statsColor = text(body.home.stats.color);
+    if (statsColor && !hexChannels(statsColor)) return fail('Impact numbers background needs a colour like #fcf2e4.');
+  }
   await updateSite((site) => {
+    if (theme && 'theme' in theme) site.theme = theme.theme;
     if (body.identity && typeof body.identity === 'object') {
       for (const key of ['name', 'tagline', 'email', 'phone', 'phoneHref', 'phone2', 'phoneHref2', 'address', 'mapQuery', 'latitude', 'longitude', 'facebook', 'instagram', 'youtube', 'linkedin'] as const) {
         if (key in body.identity) site.identity[key] = text(body.identity[key]);

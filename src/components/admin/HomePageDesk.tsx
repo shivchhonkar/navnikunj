@@ -162,6 +162,25 @@ export function HomePageDesk({ home, stats, cta, programs }: { home: HomePageSet
     <form onSubmit={save} className="max-w-3xl space-y-4" aria-busy={pending}>
       <fieldset disabled={pending} className="min-w-0 space-y-4 border-0 p-0">
         <Section title="Impact numbers" summary={`${numbers.length} ${numbers.length === 1 ? 'number' : 'numbers'}`} hint="The figures under the hero." visible={form.stats.visible} onVisible={(visible) => setForm({ ...form, stats: { ...form.stats, visible } })}>
+          <label className="block text-sm font-medium">Background colour
+            <span className="mt-1 flex items-center gap-3">
+              <input
+                type="color"
+                value={/^#[0-9a-f]{6}$/i.test(form.stats.color) ? form.stats.color : '#fcf2e4'}
+                onChange={(event) => setForm({ ...form, stats: { ...form.stats, color: event.target.value } })}
+                className="h-11 w-14 cursor-pointer rounded border border-stone-300 bg-white p-1"
+                aria-label="Impact numbers background colour"
+              />
+              <input
+                value={form.stats.color}
+                onChange={(event) => setForm({ ...form, stats: { ...form.stats, color: event.target.value } })}
+                className="w-full rounded-lg border border-stone-300 px-3 py-2 font-mono text-sm uppercase"
+                spellCheck={false}
+                maxLength={7}
+                aria-label="Impact numbers background colour hex"
+              />
+            </span>
+          </label>
           <ImageField label="Background image" src={form.stats.image} onChange={(image) => setForm({ ...form, stats: { ...form.stats, image } })} />
           <div className="flex justify-end">
             <button type="button" className="text-sm font-semibold text-brand disabled:opacity-40" disabled={numbers.length >= 6} onClick={() => setNumbers([...numbers, { value: '', label: '' }])}>Add number</button>

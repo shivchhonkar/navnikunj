@@ -6,6 +6,7 @@ import { withBanners } from './banners';
 import { withCauses } from './causes';
 import { withHeroSlides } from './hero';
 import { withHome } from './home';
+import { withTheme } from './theme';
 import { blankSite, createSeed } from './seed';
 import { asUserRole } from './types';
 import type {
@@ -177,6 +178,7 @@ async function persist(client: PoolClient, site: SiteData) {
     { slug: 'programs', title: 'Programs', kind: 'programs', content: { count: site.programs.length } },
     { slug: 'home', title: 'Home page', kind: 'home', content: site.home },
     { slug: 'banners', title: 'Page banners', kind: 'banners', content: site.banners },
+    { slug: 'theme', title: 'Theme colours', kind: 'theme', content: site.theme },
     { slug: 'causes', title: 'Causes', kind: 'causes', content: site.causes },
   ];
   for (const page of pages) {
@@ -484,6 +486,7 @@ async function load(client: PoolClient): Promise<SiteData> {
     adminUser: admin?.username || fallback.adminUser,
     passwordHash: admin?.password_hash || fallback.passwordHash,
     identity,
+    theme: withTheme(content('theme', fallback.theme)),
     hero: withHeroSlides({ ...fallback.hero, ...content('hero', fallback.hero) }),
     stats,
     about: { ...fallback.about, ...content('about', fallback.about) },

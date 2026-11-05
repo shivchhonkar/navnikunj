@@ -1,5 +1,14 @@
+export type SiteTheme = {
+  brand: string;
+  brandDark: string;
+  chrome: string;
+  background: string;
+  heroLight: string;
+  heroDark: string;
+};
+
 export type HomePageSettings = {
-  stats: { visible: boolean; image: string };
+  stats: { visible: boolean; image: string; color: string };
   work: { visible: boolean; eyebrow: string; title: string; text: string; linkLabel: string; cardLabel: string };
   about: { visible: boolean; eyebrow: string; title: string; text: string; detail: string; quote: string; image: string; linkLabel: string };
   donation: { visible: boolean; image: string; buttonLabel: string };
@@ -210,6 +219,7 @@ export type SiteData = {
     youtube: string;
     linkedin: string;
   };
+  theme: SiteTheme;
   hero: { eyebrow: string; title: string; text: string; image: string; slides: HeroSlide[] };
   stats: { value: string; label: string }[];
   about: { eyebrow: string; title: string; text: string; quote: string; image: string };
