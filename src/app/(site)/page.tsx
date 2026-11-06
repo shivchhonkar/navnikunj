@@ -96,7 +96,7 @@ export default async function HomePage() {
       <section className="bg-brand text-white">
         <div className="shell flex flex-col items-start justify-between gap-6 py-12 sm:flex-row sm:items-center md:py-14">
           <div className="flex items-center gap-5">
-            {home.donation.image ? <img src={home.donation.image} alt="" className="hidden h-20 w-auto object-contain sm:block" /> : null}
+            {home.donation.image ? <img src={home.donation.image} alt="" className="hidden h-20 w-20 p-2 object-contain sm:block border-2 border-white rounded-full bg-white" /> : null}
             <div>
               <h2 className="heading-lg text-white">{site.cta.title}</h2>
               <p className="mt-3 max-w-xl text-sm leading-7 text-white/90 sm:text-base">{site.cta.text}</p>
