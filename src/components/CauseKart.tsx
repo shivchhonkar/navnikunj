@@ -211,7 +211,7 @@ export function CauseKart({
           </div>
         ) : (
           <div className="space-y-4 p-4 sm:p-5">
-            <p className="text-sm leading-6 text-muted">Give any amount to {cause.title}. Your name and phone open in a form so you can pay securely.</p>
+            <p className="text-sm leading-6 text-muted">Give any amount to {cause.title}.</p>
             <button type="button" className="btn btn-brand w-full" onClick={openMoney}>Donate now</button>
           </div>
         )}
