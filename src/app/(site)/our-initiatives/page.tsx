@@ -5,7 +5,7 @@ import { getSite } from '@/lib/store';
 export const metadata: Metadata = {
   title: 'Donate for a cause',
   description: 'Choose a Navnikunj Foundation cause and give online.',
-  alternates: { canonical: '/donatekart' },
+  alternates: { canonical: '/our-initiatives' },
 };
 
 export default async function DonateKartPage() {

@@ -49,7 +49,7 @@ export function CauseList({ causes }: { causes: Cause[] }) {
             const progress = cause.goal > 0 ? Math.min(100, Math.round((cause.raised / cause.goal) * 100)) : 0;
             return (
               <article key={cause.id} className="card flex h-full flex-col overflow-hidden border border-line transition-shadow hover:shadow-card">
-                <Link href={`/donatekart/${cause.slug}`} className="relative block h-52">
+                <Link href={`/our-initiatives/${cause.slug}`} className="relative block h-52">
                   {cause.image ? <img src={cause.image} alt="" className="h-full w-full object-cover" /> : <span className="block h-full bg-sand" />}
                   {cause.taxBenefit ? (
                     <span className="absolute right-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold text-white">Tax benefits</span>
@@ -60,7 +60,7 @@ export function CauseList({ causes }: { causes: Cause[] }) {
                 </Link>
                 <div className="flex flex-1 flex-col p-5">
                   <h2 className="text-lg leading-snug text-ink">
-                    <Link href={`/donatekart/${cause.slug}`} className="hover:text-brand">{cause.title}</Link>
+                    <Link href={`/our-initiatives/${cause.slug}`} className="hover:text-brand">{cause.title}</Link>
                   </h2>
                   <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
                     <span>By {cause.organizer}</span>

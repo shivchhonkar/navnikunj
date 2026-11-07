@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: cause.title,
     description: cause.summary,
-    alternates: { canonical: `/donatekart/${cause.slug}` },
+    alternates: { canonical: `/our-initiatives/${cause.slug}` },
   };
 }
 
@@ -28,7 +28,7 @@ export default async function CausePage({ params }: PageProps) {
   return (
     <main>
       <div className="shell pb-4 pt-4 md:pb-5 md:pt-6">
-        <Link href="/donatekart" className="inline-flex items-center gap-1 text-sm text-brand hover:text-brandDark"><ArrowLeft size={16} /> Back to All Causes</Link>
+        <Link href="/our-initiatives" className="inline-flex items-center gap-1 text-sm text-brand hover:text-brandDark"><ArrowLeft size={16} /> Back to All Causes</Link>
       </div>
       <CauseKart
         cause={cause}
