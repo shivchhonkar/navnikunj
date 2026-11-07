@@ -99,7 +99,7 @@ export default async function HomePage() {
             {home.donation.image ? <img src={home.donation.image} alt="" className="hidden h-20 w-20 p-2 object-contain sm:block border-2 border-white rounded-full bg-white" /> : null}
             <div>
               <h2 className="heading-lg text-white">{site.cta.title}</h2>
-              <p className="mt-3 max-w-xl text-sm leading-7 text-white/90 sm:text-base">{site.cta.text}</p>
+              <p className="mt-3 max-w-4xl text-sm leading-7 text-white/90 sm:text-base">{site.cta.text}</p>
             </div>
           </div>
           {home.donation.buttonLabel ? (
