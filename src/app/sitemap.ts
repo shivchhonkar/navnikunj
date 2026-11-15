@@ -4,7 +4,7 @@ import { getSite, siteUrl } from '@/lib/store';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const site = await getSite();
   const root = siteUrl();
-  const staticPaths = ['', '/about', '/team', '/work', '/programs', '/gallery', '/news', '/contact', '/donate', '/our-initiatives'];
+  const staticPaths = ['', '/about', '/team', '/get-involved', '/collaborate', '/testimonials', '/work', '/programs', '/gallery', '/news', '/contact', '/donate', '/our-initiatives'];
   const pages: MetadataRoute.Sitemap = staticPaths.map((path) => ({
     url: `${root}${path || '/'}`,
     changeFrequency: 'weekly',

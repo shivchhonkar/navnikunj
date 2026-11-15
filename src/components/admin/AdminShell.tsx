@@ -6,7 +6,7 @@ import { CSSProperties, FormEvent, useEffect, useMemo, useRef, useState } from '
 import { AdminNotice, useAdminNotice } from '@/components/admin/AdminNotice';
 import { CONTENT_SECTIONS } from '@/lib/admin-content';
 import { POST_SECTIONS } from '@/lib/admin-posts';
-import { BarChart3, Bell, Calendar, ChevronDown, ChevronRight, ExternalLink, FileImage, FileText, Files, HandCoins, HeartHandshake, Images, IndianRupee, LayoutDashboard, LogOut, Mail, Menu, MessageSquare, Newspaper, PanelLeft, Search, UserRound, Users, X } from 'lucide-react';
+import { BarChart3, Bell, Calendar, ChevronDown, ChevronRight, ExternalLink, FileImage, FileText, Files, HandCoins, Handshake, HeartHandshake, Images, IndianRupee, LayoutDashboard, LogOut, Mail, Menu, MessageSquare, Newspaper, PanelLeft, Quote, Search, UserRound, Users, X } from 'lucide-react';
 
 const LINKS = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard },
@@ -20,6 +20,8 @@ const LINKS = [
   { href: '/admin/donations', label: 'Donations', icon: IndianRupee },
   { href: '/admin/donors', label: 'Donors', icon: HandCoins },
   { href: '/admin/volunteers', label: 'Volunteers', icon: Users },
+  { href: '/admin/testimonials', label: 'Testimonials', icon: Quote },
+  { href: '/admin/collaborations', label: 'Collaboration', icon: Handshake },
   { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
   { href: '/admin/users', label: 'Users', icon: UserRound },
 ];

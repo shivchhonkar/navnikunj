@@ -7,12 +7,29 @@ export type SiteTheme = {
   heroDark: string;
 };
 
+export type TeamPeopleCopy = {
+  visible: boolean;
+  eyebrow: string;
+  heading: string;
+  subheading: string;
+};
+
+export type TakePartKey = 'volunteer' | 'support' | 'fundraiser' | 'collaborate';
+
+export type TakePartCard = {
+  key: TakePartKey;
+  title: string;
+  text: string;
+};
+
 export type HomePageSettings = {
   stats: { visible: boolean; image: string; color: string };
   work: { visible: boolean; eyebrow: string; title: string; text: string; linkLabel: string; cardLabel: string };
   about: { visible: boolean; eyebrow: string; title: string; text: string; detail: string; quote: string; image: string; linkLabel: string };
+  takePart: { visible: boolean; eyebrow: string; title: string; text: string; cards: TakePartCard[] };
   donation: { visible: boolean; image: string; buttonLabel: string };
   news: { visible: boolean; eyebrow: string; title: string; linkLabel: string };
+  testimonials: { visible: boolean; heading: string; subheading: string };
 };
 
 export type HeroSlide = {
@@ -113,6 +130,9 @@ export type Donation = {
 };
 
 export type VolunteerStatus = 'applied' | 'active' | 'inactive';
+export type VolunteerRole = 'volunteer' | 'support' | 'fundraiser';
+export type CollaborationStatus = 'new' | 'reviewed' | 'closed';
+export type CollaborationKind = 'school' | 'company' | 'organisation' | 'inkind' | 'other';
 export type UserRole = 'superAdmin' | 'admin' | 'editor';
 
 export function asUserRole(value: string): UserRole {
@@ -134,8 +154,34 @@ export type Volunteer = {
   city: string;
   skills: string;
   availability: string;
+  role: VolunteerRole;
+  title: string;
+  image: string;
   status: VolunteerStatus;
+  featured: boolean;
   notes: string;
+  at: string;
+};
+
+export type Testimonial = {
+  id: string;
+  name: string;
+  role: string;
+  quote: string;
+  image: string;
+  published: boolean;
+  at: string;
+};
+
+export type Collaboration = {
+  id: string;
+  name: string;
+  organization: string;
+  email: string;
+  phone: string;
+  kind: CollaborationKind;
+  message: string;
+  status: CollaborationStatus;
   at: string;
 };
 
@@ -226,6 +272,7 @@ export type SiteData = {
   cta: { title: string; text: string };
   causes: Cause[];
   home: HomePageSettings;
+  teamPeople: TeamPeopleCopy;
   banners: { slug: string; title: string; text: string; image: string }[];
   programs: Program[];
   posts: Post[];
@@ -233,6 +280,8 @@ export type SiteData = {
   messages: ContactMessage[];
   donations: Donation[];
   volunteers: Volunteer[];
+  testimonials: Testimonial[];
+  collaborations: Collaboration[];
   users: AppUser[];
   images: ImageAsset[];
   reports: Report[];

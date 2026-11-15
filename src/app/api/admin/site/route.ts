@@ -4,6 +4,7 @@ import { withBanners } from '@/lib/banners';
 import { withCauses } from '@/lib/causes';
 import { withHeroSlides } from '@/lib/hero';
 import { withHome } from '@/lib/home';
+import { withTeamPeople } from '@/lib/teamCopy';
 import { hexChannels } from '@/lib/theme';
 import { fail, json, slugify, text } from '@/lib/http';
 import { updateSite } from '@/lib/store';
@@ -78,6 +79,7 @@ export async function PUT(request: Request) {
       site.cta = { title: text(body.cta.title), text: text(body.cta.text) };
     }
     if (body.home && typeof body.home === 'object') site.home = withHome(body.home);
+    if (body.teamPeople && typeof body.teamPeople === 'object') site.teamPeople = withTeamPeople(body.teamPeople);
     if (Array.isArray(body.banners)) site.banners = withBanners(body.banners);
     if (Array.isArray(body.stats)) {
       site.stats = body.stats.slice(0, 6).map((item: { value?: string; label?: string }) => ({

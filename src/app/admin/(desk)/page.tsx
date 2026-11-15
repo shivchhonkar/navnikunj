@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowUpRight, FileImage, HandCoins, IndianRupee, Mail, Newspaper, UserRound, Users, type LucideIcon } from 'lucide-react';
 import { currentUser } from '@/lib/auth';
+import { peopleRoleLabel } from '@/lib/people';
 import { getSite } from '@/lib/store';
 import { managesUsers } from '@/lib/types';
 
@@ -43,10 +44,12 @@ export default async function AdminHome() {
   const messages = site.messages.slice(0, 4);
   const volunteers = site.volunteers.slice(0, 4);
   const posts = site.posts.slice(0, 4);
+  const newCollaborations = site.collaborations.filter((item) => item.status === 'new');
   const showUsers = user ? managesUsers(user.role) : false;
 
   const attention = [
-    applied.length ? { href: '/admin/volunteers', title: `${applied.length} volunteer${applied.length === 1 ? '' : 's'} applied`, detail: 'Review who has offered time.' } : null,
+    applied.length ? { href: '/admin/volunteers', title: `${applied.length} ${applied.length === 1 ? 'person has' : 'people have'} applied`, detail: 'Review volunteers, support team, and fund raisers.' } : null,
+    newCollaborations.length ? { href: '/admin/collaborations', title: `${newCollaborations.length} collaboration ${newCollaborations.length === 1 ? 'request' : 'requests'}`, detail: 'Read who wants to work with the foundation.' } : null,
     drafts.length ? { href: '/admin/posts', title: `${drafts.length} update${drafts.length === 1 ? '' : 's'} still hidden`, detail: 'Publish news, a blog, or an event.' } : null,
     failed.length ? { href: '/admin/donations', title: `${failed.length} gift${failed.length === 1 ? '' : 's'} did not complete`, detail: 'Open donations and check the failed list.' } : null,
   ].filter((item): item is { href: string; title: string; detail: string } => Boolean(item));
@@ -84,7 +87,7 @@ export default async function AdminHome() {
               ))}
             </ul>
           ) : (
-            <p className="mt-4 text-sm leading-6 text-stone-500">Nothing is waiting. New applications, hidden updates, and unfinished gifts show up here.</p>
+            <p className="mt-4 text-sm leading-6 text-stone-500">Nothing is waiting. New applications, collaboration notes, hidden updates, and unfinished gifts show up here.</p>
           )}
         </section>
 
@@ -109,7 +112,7 @@ export default async function AdminHome() {
       <div className="mt-3 grid gap-3 lg:grid-cols-2">
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg">Volunteers</h2>
+            <h2 className="text-lg">Volunteers & supporters</h2>
             <Link href="/admin/volunteers" className="text-sm font-medium text-brand hover:text-brandDark">View all</Link>
           </div>
           <ul className="mt-4 divide-y divide-stone-100">
@@ -117,7 +120,7 @@ export default async function AdminHome() {
               <li key={person.id} className="flex items-center justify-between gap-3 py-3">
                 <span>
                   <span className="block text-sm font-semibold text-ink">{person.name}</span>
-                  <span className="mt-0.5 block text-sm text-stone-500">{[person.city, person.phone].filter(Boolean).join(' · ') || 'No contact details'}</span>
+                  <span className="mt-0.5 block text-sm text-stone-500">{[peopleRoleLabel(person.role), person.city, person.phone].filter(Boolean).join(' · ')}</span>
                 </span>
                 <span className="shrink-0 rounded-full bg-sand px-2.5 py-1 text-xs font-medium capitalize text-stone-600">{person.status}</span>
               </li>

@@ -2,6 +2,7 @@ import { defaultBanners } from './banners';
 import { DEFAULT_THEME } from './theme';
 import { defaultCauses } from './causes';
 import { defaultHome } from './home';
+import { defaultTeamPeople } from './teamCopy';
 import { PROGRAM_PHOTOS } from './programs';
 import { DEMO_PASSWORD, hashPassword } from './password';
 import type { SiteData } from './types';
@@ -61,6 +62,7 @@ function buildSite(passwordHash: string): SiteData {
     },
     causes: defaultCauses(),
     home: defaultHome(),
+    teamPeople: defaultTeamPeople(),
     banners: defaultBanners(),
     programs: [
       {
@@ -163,6 +165,8 @@ function buildSite(passwordHash: string): SiteData {
     messages: [],
     donations: [],
     volunteers: [],
+    testimonials: [],
+    collaborations: [],
     users: [],
     images: [],
     reports: [],

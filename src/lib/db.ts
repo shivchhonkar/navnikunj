@@ -158,9 +158,41 @@ CREATE TABLE IF NOT EXISTS reports (
 
 ALTER TABLE donations ADD COLUMN IF NOT EXISTS cause_slug TEXT NOT NULL DEFAULT '';
 ALTER TABLE donations ADD COLUMN IF NOT EXISTS cause_title TEXT NOT NULL DEFAULT '';
+
+ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'volunteer';
+ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS featured BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS title TEXT NOT NULL DEFAULT '';
+ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS image TEXT NOT NULL DEFAULT '';
+ALTER TABLE volunteers DROP CONSTRAINT IF EXISTS volunteers_role_check;
+ALTER TABLE volunteers ADD CONSTRAINT volunteers_role_check CHECK (role IN ('volunteer', 'support', 'fundraiser'));
+
+CREATE TABLE IF NOT EXISTS testimonials (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT '',
+  quote TEXT NOT NULL,
+  image TEXT NOT NULL DEFAULT '',
+  published BOOLEAN NOT NULL DEFAULT TRUE,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE testimonials ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS collaborations (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  organization TEXT NOT NULL DEFAULT '',
+  email TEXT NOT NULL DEFAULT '',
+  phone TEXT NOT NULL DEFAULT '',
+  kind TEXT NOT NULL DEFAULT 'other' CHECK (kind IN ('school', 'company', 'organisation', 'inkind', 'other')),
+  message TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'reviewed', 'closed')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 `;
 
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 7;
 const globalDb = globalThis as unknown as { navnikunjPool?: Pool; navnikunjReady?: Promise<void> | null; navnikunjSchema?: number };
 
 function connectionConfig() {

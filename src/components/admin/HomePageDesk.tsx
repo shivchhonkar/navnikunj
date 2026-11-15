@@ -6,9 +6,16 @@ import { useRouter } from 'next/navigation';
 import { useDeskNotice } from '@/components/admin/AdminNotice';
 import { ICON_LABELS, ICON_OPTIONS } from '@/lib/icons';
 import { programPhoto } from '@/lib/programs';
-import type { HomePageSettings, Program, SiteData } from '@/lib/types';
+import type { HomePageSettings, Program, SiteData, TakePartCard } from '@/lib/types';
 
 const field = 'mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm';
+
+const TAKE_PART_NOTES: Record<TakePartCard['key'], { name: string; link: string }> = {
+  volunteer: { name: 'Volunteer', link: 'Opens Get involved as a volunteer' },
+  support: { name: 'Support team', link: 'Opens Get involved as support team' },
+  fundraiser: { name: 'Fund raiser', link: 'Opens Get involved as a fund raiser' },
+  collaborate: { name: 'Collaborate', link: 'Opens the collaborate page' },
+};
 
 async function upload(file: File) {
   const body = new FormData();
@@ -227,6 +234,20 @@ export function HomePageDesk({ home, stats, cta, programs }: { home: HomePageSet
           <label className="block text-sm font-medium">Quote<input className={field} value={form.about.quote} onChange={(event) => setForm({ ...form, about: { ...form.about, quote: event.target.value } })} /></label>
           <label className="block text-sm font-medium">Button label<input className={field} value={form.about.linkLabel} onChange={(event) => setForm({ ...form, about: { ...form.about, linkLabel: event.target.value } })} /></label>
           <ImageField label="Photograph" src={form.about.image} onChange={(image) => setForm({ ...form, about: { ...form.about, image } })} />
+        </Section>
+
+        <Section title="Take part" summary={form.takePart.title || 'No heading yet'} hint="The four ways to help. Each card keeps its own link." visible={form.takePart.visible} onVisible={(visible) => setForm({ ...form, takePart: { ...form.takePart, visible } })}>
+          <label className="block text-sm font-medium">Eyebrow<input className={field} value={form.takePart.eyebrow} onChange={(event) => setForm({ ...form, takePart: { ...form.takePart, eyebrow: event.target.value } })} /></label>
+          <label className="block text-sm font-medium">Heading<input className={field} value={form.takePart.title} onChange={(event) => setForm({ ...form, takePart: { ...form.takePart, title: event.target.value } })} /></label>
+          <label className="block text-sm font-medium">Text<textarea className={field} rows={3} value={form.takePart.text} onChange={(event) => setForm({ ...form, takePart: { ...form.takePart, text: event.target.value } })} /></label>
+          {form.takePart.cards.map((card, index) => (
+            <div key={card.key} className="space-y-3 rounded-xl border border-stone-200 px-3 py-3">
+              <p className="text-sm font-semibold text-ink">{TAKE_PART_NOTES[card.key].name}</p>
+              <p className="text-xs text-stone-500">{TAKE_PART_NOTES[card.key].link}</p>
+              <label className="block text-sm font-medium">Title<input className={field} value={card.title} onChange={(event) => setForm({ ...form, takePart: { ...form.takePart, cards: form.takePart.cards.map((item, itemIndex) => itemIndex === index ? { ...item, title: event.target.value } : item) } })} /></label>
+              <label className="block text-sm font-medium">Text<textarea className={field} rows={2} value={card.text} onChange={(event) => setForm({ ...form, takePart: { ...form.takePart, cards: form.takePart.cards.map((item, itemIndex) => itemIndex === index ? { ...item, text: event.target.value } : item) } })} /></label>
+            </div>
+          ))}
         </Section>
 
         <Section title="Be part of the change" summary={appeal.title || 'No heading yet'} hint="The donation banner. The heading and text are shared with the donation banner editor." visible={form.donation.visible} onVisible={(visible) => setForm({ ...form, donation: { ...form.donation, visible } })}>

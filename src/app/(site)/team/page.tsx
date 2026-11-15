@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
 import { ImageIcon } from 'lucide-react';
 import { PageBanner } from '@/components/PageBanner';
+import { PeopleRow, type PublicCard } from '@/components/PeopleRow';
 import { pencil } from '@/fonts/pencil';
 import { bannerFor } from '@/lib/banners';
+import { peopleRoleLabel } from '@/lib/people';
 import { getSite } from '@/lib/store';
+import type { VolunteerRole } from '@/lib/types';
 
 export const metadata: Metadata = {
   title: 'Our team',
@@ -82,8 +85,40 @@ function Letter({ message, imageSide = 'right', tall = false }: { message: typeo
   );
 }
 
+function publicPeople(people: { id: string; name: string; role: VolunteerRole; title: string; image: string; status: string; featured: boolean }[], role: VolunteerRole): PublicCard[] {
+  return people
+    .filter((person) => person.featured && person.status === 'active' && person.role === role)
+    .map((person) => ({
+      id: person.id,
+      name: person.name,
+      title: person.title.trim() || peopleRoleLabel(person.role),
+      image: person.image,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function publicDonors(donations: { id: string; name: string; status: string }[]): PublicCard[] {
+  const seen = new Set<string>();
+  const donors: PublicCard[] = [];
+  for (const gift of donations) {
+    if (gift.status !== 'paid') continue;
+    const name = gift.name.trim();
+    const key = name.toLowerCase();
+    if (!name || key === 'anonymous' || seen.has(key)) continue;
+    seen.add(key);
+    donors.push({ id: gift.id, name, title: 'Donor', image: '' });
+  }
+  return donors.sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export default async function TeamPage() {
   const site = await getSite();
+  const people = [
+    ...publicPeople(site.volunteers, 'volunteer'),
+    ...publicPeople(site.volunteers, 'support'),
+    ...publicPeople(site.volunteers, 'fundraiser'),
+    ...publicDonors(site.donations),
+  ];
   return (
     <main>
       <PageBanner banner={bannerFor(site.banners, 'team')} />
@@ -97,6 +132,16 @@ export default async function TeamPage() {
           <Letter message={CEO} tall />
         </div>
       </section>
+      {site.teamPeople.visible ? (
+      <section className="section shell">
+        <div className="mx-auto max-w-2xl px-4 text-center">
+          {site.teamPeople.eyebrow ? <p className="eyebrow">{site.teamPeople.eyebrow}</p> : null}
+          {site.teamPeople.heading ? <h2 className="heading-lg mt-3 text-ink">{site.teamPeople.heading}</h2> : null}
+          {site.teamPeople.subheading ? <p className="lead mx-auto mt-4 max-w-xl">{site.teamPeople.subheading}</p> : null}
+        </div>
+        {people.length ? <PeopleRow people={people} label={site.teamPeople.heading || 'People with us'} /> : null}
+      </section>
+      ) : null}
     </main>
   );
 }

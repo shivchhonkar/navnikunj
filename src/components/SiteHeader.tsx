@@ -9,6 +9,13 @@ import type { SiteData } from '@/lib/types';
 const NAV = [
   { href: '/', label: 'Home' },
   { href: '/about', label: 'About Us', children: [{ href: '/team', label: 'Our Team' }] },
+  { href: '/get-involved', label: 'Get Involved', children: [
+    { href: '/get-involved#volunteer', label: 'Volunteers' },
+    { href: '/get-involved#support', label: 'Support team' },
+    { href: '/get-involved#fundraiser', label: 'Fund raisers' },
+    { href: '/collaborate', label: 'Collaborate' },
+  ] },
+  // { href: '/testimonials', label: 'Testimonials' },
   { href: '/programs', label: 'Programs' },
   { href: '/gallery', label: 'Gallery' },
   { href: '/news', label: 'News & Updates' },
@@ -16,7 +23,8 @@ const NAV = [
 ];
 
 function isCurrent(pathname: string, href: string) {
-  return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
+  const path = href.split('#')[0];
+  return path === '/' ? pathname === '/' : pathname === path || pathname.startsWith(`${path}/`);
 }
 
 export function SiteHeader({ identity }: { identity: SiteData['identity'] }) {
@@ -66,12 +74,12 @@ export function SiteHeader({ identity }: { identity: SiteData['identity'] }) {
           </div>
         </div>
       </div>
-      <div className="shell flex h-[4.5rem] items-center gap-8">
+      <div className="shell flex h-[4.5rem] items-center gap-4 xl:gap-8">
         <Link href="/" className="inline-flex shrink-0 items-center" aria-label={identity.name}>
           <img src="/images/LOGO_NT.svg" alt={identity.name} className="h-12 w-auto object-contain" />
         </Link>
-        <div className="ml-auto hidden items-center gap-10 lg:flex">
-          <nav className="flex items-center gap-7 text-[15px]" aria-label="Primary">
+        <div className="ml-auto hidden items-center gap-4 xl:gap-10 lg:flex">
+          <nav className="flex items-center gap-3.5 text-[14px] xl:gap-7 xl:text-[15px]" aria-label="Primary">
             {NAV.map((item) => {
               const active = isCurrent(pathname, item.href) || item.children?.some((child) => isCurrent(pathname, child.href));
               const mark = `relative inline-flex items-center gap-1 py-1 ${linkTone} ${active ? 'after:absolute after:-bottom-1.5 after:left-1/2 after:h-0.5 after:w-7 after:-translate-x-1/2 after:rounded-full after:bg-brand' : ''}`;
@@ -86,11 +94,14 @@ export function SiteHeader({ identity }: { identity: SiteData['identity'] }) {
                   </Link>
                   <div className="invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
                     <div className="-ml-3 min-w-[9.5rem] overflow-hidden rounded-lg border border-line bg-white py-1 shadow-md">
-                      {item.children.map((child) => (
-                        <Link key={child.href} href={child.href} className={`block whitespace-nowrap px-3 py-2 text-[15px] leading-6 ${isCurrent(pathname, child.href) ? 'bg-sand text-brand' : 'text-ink hover:bg-sand hover:text-brand'}`}>
-                          {child.label}
-                        </Link>
-                      ))}
+                      {item.children.map((child) => {
+                        const childActive = child.href.includes('#') ? false : isCurrent(pathname, child.href);
+                        return (
+                          <Link key={child.href} href={child.href} className={`block whitespace-nowrap px-3 py-2 text-[15px] leading-6 ${childActive ? 'bg-sand text-brand' : 'text-ink hover:bg-sand hover:text-brand'}`}>
+                            {child.label}
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>

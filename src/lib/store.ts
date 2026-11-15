@@ -6,6 +6,7 @@ import { withBanners } from './banners';
 import { withCauses } from './causes';
 import { withHeroSlides } from './hero';
 import { withHome } from './home';
+import { withTeamPeople } from './teamCopy';
 import { withTheme } from './theme';
 import { blankSite, createSeed } from './seed';
 import { asUserRole } from './types';
@@ -21,6 +22,10 @@ import type {
   Report,
   SiteData,
   Volunteer,
+  Testimonial,
+  Collaboration,
+  CollaborationKind,
+  CollaborationStatus,
   AppUser,
 } from './types';
 
@@ -177,6 +182,7 @@ async function persist(client: PoolClient, site: SiteData) {
     { slug: 'numbers', title: 'Impact numbers', kind: 'numbers', content: site.stats },
     { slug: 'programs', title: 'Programs', kind: 'programs', content: { count: site.programs.length } },
     { slug: 'home', title: 'Home page', kind: 'home', content: site.home },
+    { slug: 'team-people', title: 'Team people section', kind: 'team-people', content: site.teamPeople },
     { slug: 'banners', title: 'Page banners', kind: 'banners', content: site.banners },
     { slug: 'theme', title: 'Theme colours', kind: 'theme', content: site.theme },
     { slug: 'causes', title: 'Causes', kind: 'causes', content: site.causes },
@@ -371,7 +377,7 @@ async function persist(client: PoolClient, site: SiteData) {
 
 async function load(client: PoolClient): Promise<SiteData> {
   const fallback = blankSite();
-  const [pageRows, statRows, programRows, postRows, messageRows, donationRows, userRows, imageRows, volunteerRows, reportRows] = await Promise.all([
+  const [pageRows, statRows, programRows, postRows, messageRows, donationRows, userRows, imageRows, volunteerRows, reportRows, testimonialRows, collaborationRows] = await Promise.all([
     client.query<PageRow>(`SELECT slug, title, kind, content, published, updated_at FROM pages ORDER BY slug`),
     client.query<{ value: string; label: string }>(`SELECT value, label FROM stats ORDER BY sort_order`),
     client.query<{ id: string; slug: string; title: string; summary: string; body: string; icon: string; image: string }>(`SELECT id, slug, title, summary, body, icon, image FROM programs ORDER BY sort_order, title`),
@@ -380,8 +386,10 @@ async function load(client: PoolClient): Promise<SiteData> {
     client.query<{ id: string; name: string; email: string; phone: string; pan: string; address: string; country: string; amount: string; order_id: string; payment_id: string; method: string; status: string; cause_slug: string; cause_title: string; created_at: Date }>(`SELECT id, name, email, phone, pan, address, country, amount, order_id, payment_id, method, status, cause_slug, cause_title, created_at FROM donations ORDER BY sort_order, created_at DESC`),
     client.query<{ id: string; username: string; password_hash: string; display_name: string; email: string; role: string; active: boolean; created_at: Date }>(`SELECT id, username, password_hash, display_name, email, role, active, created_at FROM users ORDER BY created_at`),
     client.query<{ id: string; filename: string; url: string; alt_text: string; size_bytes: number; mime_type: string; caption: string; entity_type: string; entity_id: string; sort_order: number; created_at: Date }>(`SELECT id, filename, url, alt_text, size_bytes, mime_type, caption, entity_type, entity_id, sort_order, created_at FROM images ORDER BY created_at DESC`),
-    client.query<{ id: string; name: string; email: string; phone: string; city: string; skills: string; availability: string; status: string; notes: string; created_at: Date }>(`SELECT id, name, email, phone, city, skills, availability, status, notes, created_at FROM volunteers ORDER BY created_at DESC`),
+    client.query<{ id: string; name: string; email: string; phone: string; city: string; skills: string; availability: string; role: string; title: string; image: string; status: string; featured: boolean; notes: string; created_at: Date }>(`SELECT id, name, email, phone, city, skills, availability, role, title, image, status, featured, notes, created_at FROM volunteers ORDER BY created_at DESC`),
     client.query<{ id: string; title: string; kind: string; period_start: string; period_end: string; summary: string; payload: Record<string, number | string>; status: string; created_at: Date }>(`SELECT id, title, kind, period_start, period_end, summary, payload, status, created_at FROM reports ORDER BY created_at DESC`),
+    client.query<{ id: string; name: string; role: string; quote: string; image: string; published: boolean; created_at: Date }>(`SELECT id, name, role, quote, image, published, created_at FROM testimonials ORDER BY sort_order, created_at DESC`),
+    client.query<{ id: string; name: string; organization: string; email: string; phone: string; kind: string; message: string; status: string; created_at: Date }>(`SELECT id, name, organization, email, phone, kind, message, status, created_at FROM collaborations ORDER BY created_at DESC`),
   ]);
 
   const pagesBySlug = new Map(pageRows.rows.map((row) => [row.slug, row]));
@@ -458,8 +466,34 @@ async function load(client: PoolClient): Promise<SiteData> {
     city: row.city,
     skills: row.skills,
     availability: row.availability,
+    role: row.role === 'support' || row.role === 'fundraiser' ? row.role : 'volunteer',
+    title: row.title || '',
+    image: row.image || '',
     status: row.status === 'active' || row.status === 'inactive' ? row.status : 'applied',
+    featured: Boolean(row.featured),
     notes: row.notes,
+    at: iso(row.created_at),
+  }));
+  const testimonials: Testimonial[] = testimonialRows.rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    role: row.role,
+    quote: row.quote,
+    image: row.image,
+    published: row.published,
+    at: iso(row.created_at),
+  }));
+  const collaborationKinds = new Set<CollaborationKind>(['school', 'company', 'organisation', 'inkind', 'other']);
+  const collaborationStatuses = new Set<CollaborationStatus>(['new', 'reviewed', 'closed']);
+  const collaborations: Collaboration[] = collaborationRows.rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    organization: row.organization,
+    email: row.email,
+    phone: row.phone,
+    kind: collaborationKinds.has(row.kind as CollaborationKind) ? row.kind as CollaborationKind : 'other',
+    message: row.message,
+    status: collaborationStatuses.has(row.status as CollaborationStatus) ? row.status as CollaborationStatus : 'new',
     at: iso(row.created_at),
   }));
   const users: AppUser[] = userRows.rows.map(mapUser);
@@ -492,6 +526,7 @@ async function load(client: PoolClient): Promise<SiteData> {
     about: { ...fallback.about, ...content('about', fallback.about) },
     cta: { ...fallback.cta, ...content('donation', fallback.cta) },
     home: withHome(content('home', fallback.home)),
+    teamPeople: withTeamPeople(content('team-people', fallback.teamPeople)),
     banners: withBanners(content('banners', fallback.banners)),
     causes: withCauses(pagesBySlug.get('causes')?.content ?? undefined),
     programs,
@@ -500,6 +535,8 @@ async function load(client: PoolClient): Promise<SiteData> {
     messages,
     donations,
     volunteers,
+    testimonials,
+    collaborations,
     users,
     images,
     reports,

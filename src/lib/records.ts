@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto';
 import { query } from './db';
 import { hashPassword } from './password';
-import { asUserRole, type AuthUser, type Report, type ReportKind, type UserRole, type Volunteer, type VolunteerStatus } from './types';
+import { asUserRole, type AuthUser, type Collaboration, type CollaborationKind, type CollaborationStatus, type Report, type ReportKind, type Testimonial, type UserRole, type Volunteer, type VolunteerRole, type VolunteerStatus } from './types';
 
 type UserRow = {
   id: string;
@@ -99,19 +99,33 @@ export async function createVolunteer(input: Omit<Volunteer, 'id' | 'at'>) {
   if (!input.name.trim() || !input.phone.trim()) throw new Error('Name and phone are required.');
   const id = `vol_${randomBytes(4).toString('hex')}`;
   const result = await query<{ created_at: Date }>(
-    `INSERT INTO volunteers (id, name, email, phone, city, skills, availability, status, notes)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+    `INSERT INTO volunteers (id, name, email, phone, city, skills, availability, role, title, image, status, featured, notes)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
      RETURNING created_at`,
-    [id, input.name.trim(), input.email.trim(), input.phone.trim(), input.city.trim(), input.skills.trim(), input.availability.trim(), input.status, input.notes.trim()],
+    [id, input.name.trim(), input.email.trim(), input.phone.trim(), input.city.trim(), input.skills.trim(), input.availability.trim(), input.role, input.title.trim(), input.image.trim(), input.status, input.featured, input.notes.trim()],
   );
-  return { ...input, name: input.name.trim(), phone: input.phone.trim(), id, at: result.rows[0].created_at.toISOString() };
+  return {
+    ...input,
+    name: input.name.trim(),
+    email: input.email.trim(),
+    phone: input.phone.trim(),
+    city: input.city.trim(),
+    skills: input.skills.trim(),
+    availability: input.availability.trim(),
+    title: input.title.trim(),
+    image: input.image.trim(),
+    notes: input.notes.trim(),
+    id,
+    at: result.rows[0].created_at.toISOString(),
+  };
 }
 
 export async function updateVolunteer(id: string, input: Omit<Volunteer, 'id' | 'at'>) {
   if (!input.name.trim() || !input.phone.trim()) throw new Error('Name and phone are required.');
-  const result = await query(`UPDATE volunteers SET name=$2, email=$3, phone=$4, city=$5, skills=$6, availability=$7, status=$8, notes=$9 WHERE id=$1`, [
-    id, input.name.trim(), input.email.trim(), input.phone.trim(), input.city.trim(), input.skills.trim(), input.availability.trim(), input.status, input.notes.trim(),
-  ]);
+  const result = await query(
+    `UPDATE volunteers SET name=$2, email=$3, phone=$4, city=$5, skills=$6, availability=$7, role=$8, title=$9, image=$10, status=$11, featured=$12, notes=$13 WHERE id=$1`,
+    [id, input.name.trim(), input.email.trim(), input.phone.trim(), input.city.trim(), input.skills.trim(), input.availability.trim(), input.role, input.title.trim(), input.image.trim(), input.status, input.featured, input.notes.trim()],
+  );
   if (!result.rowCount) throw new Error('Volunteer not found.');
 }
 
@@ -229,4 +243,92 @@ export async function deleteReport(id: string) {
 
 export function volunteerStatus(value: string): VolunteerStatus {
   return value === 'active' || value === 'inactive' ? value : 'applied';
+}
+
+export function volunteerRole(value: string): VolunteerRole {
+  return value === 'support' || value === 'fundraiser' ? value : 'volunteer';
+}
+
+export async function createTestimonial(input: Omit<Testimonial, 'id' | 'at'>) {
+  const name = input.name.trim();
+  const quote = input.quote.trim();
+  if (!name || !quote) throw new Error('Name and quote are required.');
+  const id = `tst_${randomBytes(4).toString('hex')}`;
+  const result = await query<{ created_at: Date }>(
+    `INSERT INTO testimonials (id, name, role, quote, image, published, sort_order)
+     VALUES ($1,$2,$3,$4,$5,$6, (SELECT COALESCE(MIN(sort_order), 1) - 1 FROM testimonials))
+     RETURNING created_at`,
+    [id, name, input.role.trim(), quote, input.image.trim(), input.published],
+  );
+  return { id, name, role: input.role.trim(), quote, image: input.image.trim(), published: input.published, at: result.rows[0].created_at.toISOString() };
+}
+
+export async function updateTestimonial(id: string, input: Omit<Testimonial, 'id' | 'at'>) {
+  const name = input.name.trim();
+  const quote = input.quote.trim();
+  if (!name || !quote) throw new Error('Name and quote are required.');
+  const result = await query(
+    `UPDATE testimonials SET name=$2, role=$3, quote=$4, image=$5, published=$6 WHERE id=$1`,
+    [id, name, input.role.trim(), quote, input.image.trim(), input.published],
+  );
+  if (!result.rowCount) throw new Error('Testimonial not found.');
+  return { id, name, role: input.role.trim(), quote, image: input.image.trim(), published: input.published };
+}
+
+export async function deleteTestimonial(id: string) {
+  await query(`DELETE FROM testimonials WHERE id = $1`, [id]);
+}
+
+export async function reorderTestimonials(ids: string[]) {
+  const unique = [...new Set(ids.map((id) => id.trim()).filter(Boolean))];
+  for (const [index, id] of unique.entries()) {
+    await query(`UPDATE testimonials SET sort_order = $2 WHERE id = $1`, [id, index]);
+  }
+}
+
+const COLLABORATION_KINDS = new Set<CollaborationKind>(['school', 'company', 'organisation', 'inkind', 'other']);
+
+export function collaborationKind(value: string): CollaborationKind {
+  return COLLABORATION_KINDS.has(value as CollaborationKind) ? value as CollaborationKind : 'other';
+}
+
+export function collaborationStatus(value: string): CollaborationStatus {
+  return value === 'reviewed' || value === 'closed' ? value : 'new';
+}
+
+export async function createCollaboration(input: Omit<Collaboration, 'id' | 'at' | 'status'> & { status?: CollaborationStatus }) {
+  const name = input.name.trim();
+  const email = input.email.trim();
+  const message = input.message.trim();
+  if (!name || !email || !message) throw new Error('Name, email, and a short note are required.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Enter a valid email.');
+  const id = `col_${randomBytes(4).toString('hex')}`;
+  const status = input.status || 'new';
+  const result = await query<{ created_at: Date }>(
+    `INSERT INTO collaborations (id, name, organization, email, phone, kind, message, status)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+     RETURNING created_at`,
+    [id, name, input.organization.trim(), email, input.phone.trim(), input.kind, message, status],
+  );
+  const saved: Collaboration = {
+    id,
+    name,
+    organization: input.organization.trim(),
+    email,
+    phone: input.phone.trim(),
+    kind: input.kind,
+    message,
+    status,
+    at: result.rows[0].created_at.toISOString(),
+  };
+  return saved;
+}
+
+export async function updateCollaborationStatus(id: string, status: CollaborationStatus) {
+  const result = await query(`UPDATE collaborations SET status = $2 WHERE id = $1`, [id, status]);
+  if (!result.rowCount) throw new Error('Collaboration request not found.');
+}
+
+export async function deleteCollaboration(id: string) {
+  await query(`DELETE FROM collaborations WHERE id = $1`, [id]);
 }

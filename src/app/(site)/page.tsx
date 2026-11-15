@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { ArrowRight, BadgeCheck, BookOpen, Heart, Users } from 'lucide-react';
+import { ArrowRight, BadgeCheck, BookOpen, HandHeart, Handshake, Heart, Megaphone, Users } from 'lucide-react';
 import { HeroBanner } from '@/components/HeroBanner';
 import { ProgramSlider } from '@/components/ProgramSlider';
+import { TestimonialSlider } from '@/components/TestimonialSlider';
 import { getSite } from '@/lib/store';
 
 const ABOUT_PHOTO = '/images/banner_images/banner-poor-childrens.jpeg';
@@ -13,6 +14,13 @@ const STORY_PHOTOS = [
 ];
 
 const STAT_ICONS = [Users, BookOpen, Heart, BadgeCheck];
+
+const TAKE_PART = {
+  volunteer: { href: '/get-involved#volunteer', icon: Users },
+  support: { href: '/get-involved#support', icon: HandHeart },
+  fundraiser: { href: '/get-involved#fundraiser', icon: Megaphone },
+  collaborate: { href: '/collaborate', icon: Handshake },
+} as const;
 
 function storyDate(value: string) {
   const date = new Date(value);
@@ -26,7 +34,11 @@ function storyDate(value: string) {
 export default async function HomePage() {
   const site = await getSite();
   const posts = site.posts.filter((post) => post.published).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
+  const quotes = site.testimonials.filter((item) => item.published);
   const home = site.home;
+  const ways = home.takePart.cards
+    .map((card) => ({ ...card, ...TAKE_PART[card.key] }))
+    .filter((card) => card.title || card.text);
   const aboutImage = home.about.image || site.about.image || ABOUT_PHOTO;
 
   return (
@@ -92,6 +104,32 @@ export default async function HomePage() {
       </section>
       ) : null}
 
+      {home.takePart.visible ? (
+      <section className="section bg-cream">
+        <div className="shell">
+          <div className="mx-auto max-w-2xl text-center">
+            {home.takePart.eyebrow ? <p className="eyebrow">{home.takePart.eyebrow}</p> : null}
+            {home.takePart.title ? <h2 className="heading-lg mt-3 text-ink">{home.takePart.title}</h2> : null}
+            {home.takePart.text ? <p className="lead mt-4">{home.takePart.text}</p> : null}
+          </div>
+          {ways.length ? (
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {ways.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link key={item.key} href={item.href} className="card border border-line p-5 transition hover:border-brand">
+                  <Icon className="text-brand" size={22} aria-hidden />
+                  {item.title ? <h3 className="mt-3 text-lg text-ink">{item.title}</h3> : null}
+                  {item.text ? <p className="lead mt-2 text-sm">{item.text}</p> : null}
+                </Link>
+              );
+            })}
+          </div>
+          ) : null}
+        </div>
+      </section>
+      ) : null}
+
       {home.donation.visible ? (
       <section className="bg-brand text-white">
         <div className="shell flex flex-col items-start justify-between gap-6 py-12 sm:flex-row sm:items-center md:py-14">
@@ -108,6 +146,19 @@ export default async function HomePage() {
             </Link>
           ) : null}
         </div>
+      </section>
+      ) : null}
+
+      {home.testimonials.visible && quotes.length ? (
+      <section className="section shell">
+        <div className="mx-auto max-w-2xl text-center">
+          {home.testimonials.subheading ? <p className="eyebrow">{home.testimonials.subheading}</p> : null}
+          {home.testimonials.heading ? <h2 className="heading-lg mt-3 text-ink">{home.testimonials.heading}</h2> : null}
+        </div>
+        <TestimonialSlider testimonials={quotes} />
+        {/* <div className="mt-8 text-center">
+          <Link href="/testimonials" className="btn btn-line">More <ArrowRight size={15} /></Link>
+        </div> */}
       </section>
       ) : null}
 
