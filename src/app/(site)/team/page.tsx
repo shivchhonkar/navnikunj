@@ -97,27 +97,12 @@ function publicPeople(people: { id: string; name: string; role: VolunteerRole; t
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function publicDonors(donations: { id: string; name: string; status: string }[]): PublicCard[] {
-  const seen = new Set<string>();
-  const donors: PublicCard[] = [];
-  for (const gift of donations) {
-    if (gift.status !== 'paid') continue;
-    const name = gift.name.trim();
-    const key = name.toLowerCase();
-    if (!name || key === 'anonymous' || seen.has(key)) continue;
-    seen.add(key);
-    donors.push({ id: gift.id, name, title: 'Donor', image: '' });
-  }
-  return donors.sort((a, b) => a.name.localeCompare(b.name));
-}
-
 export default async function TeamPage() {
   const site = await getSite();
   const people = [
     ...publicPeople(site.volunteers, 'volunteer'),
     ...publicPeople(site.volunteers, 'support'),
     ...publicPeople(site.volunteers, 'fundraiser'),
-    ...publicDonors(site.donations),
   ];
   return (
     <main>
