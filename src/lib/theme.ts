@@ -2,11 +2,11 @@ import type { CSSProperties } from 'react';
 import type { SiteTheme } from './types';
 
 export const DEFAULT_THEME: SiteTheme = {
-  brand: '#e07a2f',
-  brandDark: '#b04812',
+  brand: '#d91d2b',
+  brandDark: '#8c2222',
   chrome: '#16100e',
-  background: '#fff8f1',
-  heroLight: '#fff8f1',
+  background: '#ffffff',
+  heroLight: '#ffffff',
   heroDark: '#1c1412',
 };
 
