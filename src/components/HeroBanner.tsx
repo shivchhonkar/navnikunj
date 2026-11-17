@@ -18,7 +18,7 @@ export function HeroBanner({ eyebrow, slides }: { eyebrow: string; slides: HeroS
   useEffect(() => {
     if (!many || paused) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const timer = window.setInterval(() => setIndex((value) => (value + 1) % items.length), 7000);
+    const timer = window.setInterval(() => setIndex((value) => (value + 1) % items.length), 4000);
     return () => window.clearInterval(timer);
   }, [many, paused, items.length]);
 
