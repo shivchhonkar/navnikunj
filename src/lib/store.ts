@@ -228,13 +228,13 @@ async function persist(client: PoolClient, site: SiteData) {
   await client.query(`DELETE FROM posts WHERE id <> ALL($1::text[])`, [ids(site.posts.map((item) => item.id))]);
   for (const [index, post] of site.posts.entries()) {
     await client.query(
-      `INSERT INTO posts (id, slug, kind, title, excerpt, body, image, post_date, location, keywords, published, sort_order, updated_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,NOW())
+      `INSERT INTO posts (id, slug, kind, title, excerpt, body, image, video, post_date, location, keywords, published, sort_order, updated_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW())
        ON CONFLICT (id) DO UPDATE SET
          slug = EXCLUDED.slug, kind = EXCLUDED.kind, title = EXCLUDED.title, excerpt = EXCLUDED.excerpt,
-         body = EXCLUDED.body, image = EXCLUDED.image, post_date = EXCLUDED.post_date, location = EXCLUDED.location,
+         body = EXCLUDED.body, image = EXCLUDED.image, video = EXCLUDED.video, post_date = EXCLUDED.post_date, location = EXCLUDED.location,
          keywords = EXCLUDED.keywords, published = EXCLUDED.published, sort_order = EXCLUDED.sort_order, updated_at = NOW()`,
-      [post.id, post.slug, post.kind, post.title, post.excerpt, post.body, post.image, post.date, post.location, post.keywords, post.published, index],
+      [post.id, post.slug, post.kind, post.title, post.excerpt, post.body, post.image, post.video || '', post.date, post.location, post.keywords, post.published, index],
     );
   }
 
@@ -381,7 +381,7 @@ async function load(client: PoolClient): Promise<SiteData> {
     client.query<PageRow>(`SELECT slug, title, kind, content, published, updated_at FROM pages ORDER BY slug`),
     client.query<{ value: string; label: string }>(`SELECT value, label FROM stats ORDER BY sort_order`),
     client.query<{ id: string; slug: string; title: string; summary: string; body: string; icon: string; image: string }>(`SELECT id, slug, title, summary, body, icon, image FROM programs ORDER BY sort_order, title`),
-    client.query<{ id: string; slug: string; kind: string; title: string; excerpt: string; body: string; image: string; post_date: string; location: string; keywords: string; published: boolean }>(`SELECT id, slug, kind, title, excerpt, body, image, post_date, location, keywords, published FROM posts ORDER BY sort_order, post_date DESC`),
+    client.query<{ id: string; slug: string; kind: string; title: string; excerpt: string; body: string; image: string; video: string; post_date: string; location: string; keywords: string; published: boolean }>(`SELECT id, slug, kind, title, excerpt, body, image, video, post_date, location, keywords, published FROM posts ORDER BY sort_order, post_date DESC`),
     client.query<{ id: string; name: string; email: string; phone: string; message: string; created_at: Date }>(`SELECT id, name, email, phone, message, created_at FROM messages ORDER BY sort_order, created_at DESC`),
     client.query<{ id: string; name: string; email: string; phone: string; pan: string; address: string; country: string; amount: string; order_id: string; payment_id: string; method: string; status: string; cause_slug: string; cause_title: string; created_at: Date }>(`SELECT id, name, email, phone, pan, address, country, amount, order_id, payment_id, method, status, cause_slug, cause_title, created_at FROM donations ORDER BY sort_order, created_at DESC`),
     client.query<{ id: string; username: string; password_hash: string; display_name: string; email: string; role: string; active: boolean; created_at: Date }>(`SELECT id, username, password_hash, display_name, email, role, active, created_at FROM users ORDER BY created_at`),
@@ -419,6 +419,7 @@ async function load(client: PoolClient): Promise<SiteData> {
     excerpt: row.excerpt,
     body: row.body,
     image: row.image,
+    video: row.video || '',
     date: row.post_date,
     location: row.location,
     keywords: row.keywords || '',

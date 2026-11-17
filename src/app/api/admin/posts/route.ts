@@ -3,6 +3,7 @@ import { isAdmin } from '@/lib/auth';
 import { fail, json, slugify, text } from '@/lib/http';
 import { updateSite } from '@/lib/store';
 import type { PostKind } from '@/lib/types';
+import { readYoutube } from '@/lib/youtube';
 
 const KINDS = new Set(['blog', 'news', 'event']);
 
@@ -12,6 +13,9 @@ export async function POST(request: Request) {
   const title = text(body.title);
   if (!title) return fail('Title is required');
   const kind: PostKind = KINDS.has(text(body.kind)) ? text(body.kind) as PostKind : 'news';
+  const videoResult = readYoutube(body.video);
+  if ('error' in videoResult) return fail(videoResult.error ?? 'Invalid video URL');
+  const image = videoResult.video ? '' : text(body.image);
   const id = `post_${randomBytes(4).toString('hex')}`;
   await updateSite((site) => {
     let slug = slugify(title);
@@ -23,7 +27,8 @@ export async function POST(request: Request) {
       title,
       excerpt: text(body.excerpt),
       body: text(body.body),
-      image: text(body.image),
+      image,
+      video: videoResult.video,
       date: text(body.date) || new Date().toISOString().slice(0, 10),
       location: text(body.location),
       keywords: text(body.keywords),

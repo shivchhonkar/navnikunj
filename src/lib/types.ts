@@ -60,6 +60,7 @@ export type Post = {
   excerpt: string;
   body: string;
   image: string;
+  video: string;
   date: string;
   location: string;
   keywords: string;

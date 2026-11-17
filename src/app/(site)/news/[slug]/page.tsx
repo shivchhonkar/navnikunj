@@ -4,9 +4,11 @@ import { notFound } from 'next/navigation';
 import { CalendarDays, MapPin } from 'lucide-react';
 import { PostCard, formatPostDate, postPhoto } from '@/components/PostCard';
 import { ShareLinks } from '@/components/ShareLinks';
+import { YoutubeEmbed } from '@/components/YoutubeEmbed';
 import { storyHtml } from '@/lib/story';
 import { getSite, siteUrl } from '@/lib/store';
 import type { Post } from '@/lib/types';
+import { youtubeId, youtubeThumb } from '@/lib/youtube';
 
 type Params = { params: { slug: string } };
 
@@ -57,7 +59,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!post) return { title: 'Update' };
   const site = await getSite();
   const pageUrl = `${siteUrl()}/news/${post.slug}`;
-  const image = postPhoto(post);
+  const image = youtubeThumb(post.video) || postPhoto(post) || `${siteUrl()}/logo.png`;
   return {
     title: post.title,
     description: post.excerpt,
@@ -87,7 +89,8 @@ export default async function NewsArticle({ params }: Params) {
   if (!post) notFound();
 
   const pageUrl = `${siteUrl()}/news/${post.slug}`;
-  const image = postPhoto(post);
+  const video = post.video && youtubeId(post.video) ? post.video : '';
+  const image = youtubeThumb(post.video) || postPhoto(post) || `${siteUrl()}/logo.png`;
   const related = site.posts
     .filter((item) => item.published && item.id !== post.id)
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -135,6 +138,13 @@ export default async function NewsArticle({ params }: Params) {
             <span aria-hidden>/</span>
             <span className="text-ink">{post.title}</span>
           </nav>
+          {video ? (
+            <div className="mt-8 overflow-hidden rounded-card border border-line bg-ink shadow-card">
+              <div className="aspect-video w-full">
+                <YoutubeEmbed video={video} title={post.title} autoplay className="h-full w-full border-0" />
+              </div>
+            </div>
+          ) : null}
           {post.excerpt ? <p className="lead mt-8 text-lg">{post.excerpt}</p> : null}
           <div className="story mt-8 text-base leading-8 text-ink" dangerouslySetInnerHTML={{ __html: storyHtml(post.body) }} />
           <div className="mt-10 rounded-card border border-line bg-paper px-5 py-5">

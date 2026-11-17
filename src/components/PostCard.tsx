@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { YoutubeEmbed } from '@/components/YoutubeEmbed';
+import { youtubeId } from '@/lib/youtube';
 import type { Post } from '@/lib/types';
 
 export function formatPostDate(value: string) {
@@ -15,17 +17,23 @@ const FALLBACK_PHOTOS = [
   'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=900&q=80',
 ];
 
-export function postPhoto(post: { image: string; title: string }) {
+export function postPhoto(post: { image: string; title: string; video?: string }) {
+  if (post.video && youtubeId(post.video)) return '';
   return post.image || FALLBACK_PHOTOS[post.title.length % FALLBACK_PHOTOS.length];
 }
 
 export function PostCard({ post }: { post: Post }) {
+  const video = post.video && youtubeId(post.video) ? post.video : '';
   const photo = postPhoto(post);
   return (
     <article className="card flex h-full flex-col overflow-hidden border border-line">
-      <div className="relative h-44">
-        <img src={photo} alt="" className="h-full w-full object-cover" />
-        <p className="absolute left-3 top-3 rounded-full bg-paper px-2.5 py-1 text-[11px] uppercase tracking-wide text-brandDark">{KIND_LABEL[post.kind]}</p>
+      <div className="relative h-44 overflow-hidden bg-ink">
+        {video ? (
+          <YoutubeEmbed video={video} title={post.title} autoplay className="pointer-events-none absolute inset-0 h-full w-full border-0" />
+        ) : (
+          <img src={photo} alt="" className="h-full w-full object-cover" />
+        )}
+        <p className="absolute left-3 top-3 z-10 rounded-full bg-paper px-2.5 py-1 text-[11px] uppercase tracking-wide text-brandDark">{KIND_LABEL[post.kind]}</p>
       </div>
       <div className="flex flex-1 flex-col p-5">
         <p className="text-xs text-muted">{formatPostDate(post.date)}{post.location ? ` · ${post.location}` : ''}</p>

@@ -71,6 +71,8 @@ CREATE TABLE IF NOT EXISTS posts (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS video TEXT NOT NULL DEFAULT '';
+
 CREATE TABLE IF NOT EXISTS donors (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -192,7 +194,7 @@ CREATE TABLE IF NOT EXISTS collaborations (
 );
 `;
 
-const SCHEMA_VERSION = 7;
+const SCHEMA_VERSION = 8;
 const globalDb = globalThis as unknown as { navnikunjPool?: Pool; navnikunjReady?: Promise<void> | null; navnikunjSchema?: number };
 
 function connectionConfig() {

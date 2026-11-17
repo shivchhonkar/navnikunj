@@ -6,6 +6,7 @@ import { X } from 'lucide-react';
 import { useDeskNotice } from '@/components/admin/AdminNotice';
 import { StoryEditor } from '@/components/admin/StoryEditor';
 import type { Post, PostKind } from '@/lib/types';
+import { youtubeId, youtubeThumb } from '@/lib/youtube';
 
 const field = 'mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm disabled:bg-stone-100';
 
@@ -29,6 +30,7 @@ type Draft = {
   excerpt: string;
   body: string;
   image: string;
+  video: string;
   date: string;
   location: string;
   keywords: string;
@@ -36,7 +38,7 @@ type Draft = {
 };
 
 function blank(kind: PostKind): Draft {
-  return { kind, title: '', excerpt: '', body: '', image: '', date: '', location: '', keywords: '', published: true };
+  return { kind, title: '', excerpt: '', body: '', image: '', video: '', date: '', location: '', keywords: '', published: true };
 }
 
 function fromPost(post: Post): Draft {
@@ -46,6 +48,7 @@ function fromPost(post: Post): Draft {
     excerpt: post.excerpt,
     body: post.body,
     image: post.image,
+    video: post.video || '',
     date: post.date,
     location: post.location,
     keywords: post.keywords || '',
@@ -73,6 +76,7 @@ export function PostsDesk({ posts, initialKind = 'all', modal = false, pageSize 
   const [pending, setPending] = useState(false);
   const [removingId, setRemovingId] = useState('');
   const [imageKey, setImageKey] = useState(0);
+  const [mediaMode, setMediaMode] = useState<'image' | 'video'>('image');
   const [page, setPage] = useState(1);
   const { show, clear } = useDeskNotice();
   const counts = {
@@ -93,6 +97,7 @@ export function PostsDesk({ posts, initialKind = 'all', modal = false, pageSize 
     setOpen(false);
     setEditing('');
     setForm(blank(defaultKind));
+    setMediaMode('image');
     setImageKey((key) => key + 1);
   };
 
@@ -117,10 +122,13 @@ export function PostsDesk({ posts, initialKind = 'all', modal = false, pageSize 
     setPending(true);
     clear();
     try {
+      const payload = mediaMode === 'video'
+        ? { ...form, image: '', video: form.video.trim() }
+        : { ...form, video: '', image: form.image };
       const response = await fetch(editing ? `/api/admin/posts/${editing}` : '/api/admin/posts', {
         method: editing ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
@@ -130,6 +138,7 @@ export function PostsDesk({ posts, initialKind = 'all', modal = false, pageSize 
       const savedExisting = Boolean(editing);
       setForm(blank(defaultKind));
       setEditing('');
+      setMediaMode('image');
       setImageKey((key) => key + 1);
       setOpen(false);
       show('success', savedExisting ? 'Post saved.' : 'Post added.');
@@ -173,7 +182,8 @@ export function PostsDesk({ posts, initialKind = 'all', modal = false, pageSize 
     clear();
     try {
       const image = await upload(ready);
-      setForm((current) => ({ ...current, image }));
+      setForm((current) => ({ ...current, image, video: '' }));
+      setMediaMode('image');
       show('success', 'Image ready. Save to attach it to this post.');
     } catch (reason) {
       show('error', reason instanceof Error ? reason.message : 'The image could not be uploaded.');
@@ -199,11 +209,51 @@ export function PostsDesk({ posts, initialKind = 'all', modal = false, pageSize 
         <div className="block text-sm font-medium">Story
           <StoryEditor value={form.body} disabled={pending} onChange={(body) => setForm((current) => ({ ...current, body }))} />
         </div>
-        <label className="block text-sm font-medium">Image
-          <input key={imageKey} type="file" accept="image/*" className="mt-1 block text-sm disabled:cursor-not-allowed" onChange={(event) => onImage(event.target.files?.[0])} />
-          <span className="mt-1 block text-xs font-normal text-stone-500">Use a landscape photo, 1600 × 900 px. It fills the article banner and the news cards.</span>
-        </label>
-        {form.image ? <img src={form.image} alt="" className="h-24 rounded-lg object-cover" /> : null}
+        <div className="space-y-3 rounded-xl border border-stone-200 p-3">
+          <p className="text-sm font-semibold">Cover media</p>
+          <p className="text-xs text-stone-500">Choose either a photograph or a YouTube link. Saving one clears the other.</p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className={`rounded-full px-3 py-1.5 text-sm ${mediaMode === 'image' ? 'bg-brand text-white' : 'border border-stone-300 text-ink'}`}
+              onClick={() => { setMediaMode('image'); setForm((current) => ({ ...current, video: '' })); }}
+            >
+              Image
+            </button>
+            <button
+              type="button"
+              className={`rounded-full px-3 py-1.5 text-sm ${mediaMode === 'video' ? 'bg-brand text-white' : 'border border-stone-300 text-ink'}`}
+              onClick={() => { setMediaMode('video'); setForm((current) => ({ ...current, image: '' })); setImageKey((key) => key + 1); }}
+            >
+              YouTube
+            </button>
+          </div>
+          {mediaMode === 'video' ? (
+            <label className="block text-sm font-medium">YouTube link
+              <input
+                className={field}
+                value={form.video}
+                placeholder="https://www.youtube.com/watch?v=…"
+                onChange={(event) => setForm({ ...form, video: event.target.value, image: '' })}
+              />
+              <span className="mt-1 block text-xs font-normal text-stone-500">Paste a watch, youtu.be, or Shorts link. It autoplays on the news page.</span>
+            </label>
+          ) : (
+            <label className="block text-sm font-medium">Image
+              <input key={imageKey} type="file" accept="image/*" className="mt-1 block text-sm disabled:cursor-not-allowed" onChange={(event) => onImage(event.target.files?.[0])} />
+              <span className="mt-1 block text-xs font-normal text-stone-500">Use a landscape photo, 1600 × 900 px. It fills the article banner and the news cards.</span>
+            </label>
+          )}
+          {mediaMode === 'video' && youtubeId(form.video) ? (
+            <img src={youtubeThumb(form.video)} alt="" className="h-24 rounded-lg object-cover" />
+          ) : null}
+          {mediaMode === 'image' && form.image ? <img src={form.image} alt="" className="h-24 rounded-lg object-cover" /> : null}
+          {mediaMode === 'image' && form.image ? (
+            <button type="button" className="text-sm text-red-700" onClick={() => { setForm({ ...form, image: '' }); setImageKey((key) => key + 1); }}>
+              Remove image
+            </button>
+          ) : null}
+        </div>
         <div className="space-y-3 rounded-xl border border-stone-200 p-3">
           <p className="text-sm font-semibold">SEO</p>
           <label className="block text-sm font-medium">Keywords
@@ -226,7 +276,11 @@ export function PostsDesk({ posts, initialKind = 'all', modal = false, pageSize 
         {visible.map((post) => (
           <li key={post.id} className="flex gap-4 rounded-2xl bg-white p-3 shadow-sm">
             <div className="h-20 w-28 shrink-0 overflow-hidden rounded-lg bg-stone-200">
-              {post.image ? <img src={post.image} alt="" className="h-full w-full object-cover" /> : null}
+              {post.video && youtubeId(post.video) ? (
+                <img src={youtubeThumb(post.video)} alt="" className="h-full w-full object-cover" />
+              ) : post.image ? (
+                <img src={post.image} alt="" className="h-full w-full object-cover" />
+              ) : null}
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs uppercase tracking-wide text-brand">{labelFor(post.kind)} · {post.published ? 'Published' : 'Hidden'}</p>
@@ -234,7 +288,7 @@ export function PostsDesk({ posts, initialKind = 'all', modal = false, pageSize 
               <p className="text-sm text-stone-500">{post.date}{post.location ? ` · ${post.location}` : ''}</p>
               {post.keywords ? <p className="mt-1 truncate text-xs text-stone-400">{post.keywords}</p> : null}
               <div className="mt-2 flex gap-3 text-sm">
-                <button type="button" disabled={Boolean(removingId) || pending} className="font-semibold text-brand disabled:cursor-not-allowed disabled:opacity-50" onClick={() => { setEditing(post.id); setForm(fromPost(post)); setImageKey((key) => key + 1); setOpen(true); clear(); }}>Edit</button>
+                <button type="button" disabled={Boolean(removingId) || pending} className="font-semibold text-brand disabled:cursor-not-allowed disabled:opacity-50" onClick={() => { setEditing(post.id); setForm(fromPost(post)); setMediaMode(post.video ? 'video' : 'image'); setImageKey((key) => key + 1); setOpen(true); clear(); }}>Edit</button>
                 <button type="button" disabled={Boolean(removingId) || pending} className="text-red-700 disabled:cursor-not-allowed disabled:opacity-50" onClick={() => remove(post.id)}>{removingId === post.id ? 'Deleting…' : 'Delete'}</button>
               </div>
             </div>
@@ -275,7 +329,7 @@ export function PostsDesk({ posts, initialKind = 'all', modal = false, pageSize 
                 {KIND_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label} ({counts[option.value]})</option>)}
               </select>
             </label>
-            <button type="button" onClick={() => { setEditing(''); setForm(blank(defaultKind)); setImageKey((key) => key + 1); setOpen(true); }} className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white">Add</button>
+            <button type="button" onClick={() => { setEditing(''); setForm(blank(defaultKind)); setMediaMode('image'); setImageKey((key) => key + 1); setOpen(true); }} className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white">Add</button>
           </div>
         </div>
       ) : null}
